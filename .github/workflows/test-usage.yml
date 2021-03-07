@@ -1,0 +1,19 @@
+name: 'Test Usage'
+on:
+  pull_request:
+    types: [opened, edited, labeled, reopened, review_requested]
+    branch:
+      - main
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+
+jobs:
+  unresolvedReviewThreads:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          label: 'reviewThreadsResolved'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

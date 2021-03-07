@@ -29,6 +29,9 @@ labels:
   - name: feature
     color: '#336699'
     description: New functionality
+  - name: reviewThreadsResolved
+    color: '#333333'
+    description: All review threads have been resolved. Trigger UnresolvedReviewThreads check.
 
 branches:
   - name: main

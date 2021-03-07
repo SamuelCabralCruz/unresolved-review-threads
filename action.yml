@@ -1,6 +1,11 @@
 name: 'Unresolved Review Threads'
 description: 'Prevent merge of pull request having unresolved review threads'
 author: 'SamuelCabralCruz'
+inputs:
+  label:
+    description: Specify the name of the label to retrigger workflow check once all review threads are resolved.
+    required: false
+    default: 'reviewThreadsResolved'
 runs:
   using: 'node12'
   main: 'dist/index.js'
