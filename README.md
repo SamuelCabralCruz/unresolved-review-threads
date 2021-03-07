@@ -18,7 +18,8 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
         types: [created, edited, deleted]
 
     jobs:
-      unresolvedReviewThreads:
+      build:
+        name: 'Unresolved Review Threads'
         runs-on: ubuntu-latest
         steps:
           - uses: SamuelCabralCruz/unresolved-review-threads@v1.x

@@ -8,7 +8,8 @@ on:
     types: [created, edited, deleted]
 
 jobs:
-  unresolvedReviewThreads:
+  build:
+    name: 'Unresolved Review Threads'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
