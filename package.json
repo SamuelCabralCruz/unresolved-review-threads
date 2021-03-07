@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "test": "jest",
-    "dist": "ncc build --source-map --license licenses.txt"
+    "dist": "ncc build --source-map --license licenses.txt",
+    "release": "npm run build && npm run dist"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,8 @@
   "homepage": "https://github.com/SamuelCabralCruz/unresolved-review-threads#readme",
   "dependencies": {
     "@actions/core": "1.2.6",
-    "@actions/github": "4.0.0"
+    "@actions/github": "4.0.0",
+    "@octokit/rest": "18.3.4"
   },
   "devDependencies": {
     "@types/jest": "26.0.20",
