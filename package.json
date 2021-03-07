@@ -2,10 +2,11 @@
   "name": "unresolved-review-threads",
   "version": "1.0.0",
   "description": "GitHub Action to prevent the merge of pull request having unresolved review threads",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "jest"
+    "build": "tsc -p tsconfig.prod.json",
+    "test": "jest",
+    "dist": "ncc build --source-map --license licenses.txt"
   },
   "repository": {
     "type": "git",

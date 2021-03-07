@@ -2,7 +2,7 @@
 
 GitHub Action to prevent the merge of pull request having unresolved review threads
 
-[![Build Status](https://github.com/SamuelCabralCruz/unresolved-review-threads/workflows/CI - Pipeline/badge.svg)](https://github.com/SamuelCabralCruz/unresolved-review-threads/actions)
+[![Build Status](https://github.com/SamuelCabralCruz/unresolved-review-threads/workflows/CI%20-%20Pipeline/badge.svg)](https://github.com/SamuelCabralCruz/unresolved-review-threads/actions)
 
 ## Example Usage
 
