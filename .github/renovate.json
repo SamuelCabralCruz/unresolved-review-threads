@@ -1,0 +1,39 @@
+{
+  "extends": ["config:js-app"],
+  "separateMajorMinor": false,
+  "ignoreDeps": [],
+  "packageRules": [
+    {
+      "packageNames": [
+        "node"
+      ],
+      "enabled": false
+    },
+    {
+      "packagePatterns": [".*"],
+      "groupName": "Tools",
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "depTypeList": ["action"],
+      "groupName": "Actions",
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "packagePatterns": ["^npm"],
+      "groupName": "Node Package Manager",
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "packagePatterns": ["^typescript$", "^ts", "tsconfig-paths-webpack-plugin"],
+      "groupName": "Typescript",
+      "schedule": ["before 6am on Monday"]
+    },
+    {
+      "packagePatterns": ["jest", "@types/jest", "ts-jest"],
+      "groupName": "Test",
+      "schedule": ["before 6am on Monday"]
+    }
+  ],
+  "masterIssue": true
+}
