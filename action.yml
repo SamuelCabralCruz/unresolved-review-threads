@@ -1,0 +1,6 @@
+name: 'Unresolved Review Threads'
+description: 'Prevent merge of pull request having unresolved review threads'
+author: 'SamuelCabralCruz'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'

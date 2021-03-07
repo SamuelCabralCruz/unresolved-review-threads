@@ -1,0 +1,41 @@
+name: 'CI - Pipeline'
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build - Lint - Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Read .nvmrc
+        id: node_version
+        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ steps.node_version.outputs.NODE_VERSION }}
+
+      - name: Cache Dependencies
+        id: npm-cache
+        uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Test
+        run: npm run test
