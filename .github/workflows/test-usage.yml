@@ -1,15 +1,14 @@
 name: 'Test Usage'
 on:
   pull_request:
-    types: [opened, edited, labeled, reopened, review_requested]
+    types: [opened, edited, labeled, reopened, review_requested, synchronize]
     branch:
       - main
   pull_request_review_comment:
     types: [created, edited, deleted]
 
 jobs:
-  build:
-    name: 'Unresolved Review Threads'
+  unresolvedReviewThreads:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

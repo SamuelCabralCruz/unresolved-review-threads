@@ -8,18 +8,17 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 
 - Create a unresolvedReviewThreads.yml file with the following content:
     ```yaml
-    name: Unresolved Review Threads 
+    name: 'Unresolved Review Threads'
     on:
       pull_request:
-        types: [opened, edited, labeled, reopened, review_requested]
+        types: [opened, edited, labeled, reopened, review_requested, synchronize]
         branch:
           - main
       pull_request_review_comment:
         types: [created, edited, deleted]
 
     jobs:
-      build:
-        name: 'Unresolved Review Threads'
+      unresolvedReviewThreads:
         runs-on: ubuntu-latest
         steps:
           - uses: SamuelCabralCruz/unresolved-review-threads@v1.x
@@ -29,3 +28,4 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     ```
 - If no label input is provided, the action will use a label name `reviewThreadsResolved` by default.
+- Don't forget to enforce the check in your branch rule settings
