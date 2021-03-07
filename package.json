@@ -1,0 +1,36 @@
+{
+  "name": "unresolved-review-threads",
+  "version": "1.0.0",
+  "description": "GitHub Action to prevent the merge of pull request having unresolved review threads",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamuelCabralCruz/unresolved-review-threads.git"
+  },
+  "keywords": [
+    "github-actions",
+    "github-checks",
+    "pull-requests"
+  ],
+  "author": "SamuelCabralCruz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SamuelCabralCruz/unresolved-review-threads/issues"
+  },
+  "homepage": "https://github.com/SamuelCabralCruz/unresolved-review-threads#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.20",
+    "@types/node": "^14.14.31",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.5.3",
+    "typescript": "^4.2.3"
+  }
+}

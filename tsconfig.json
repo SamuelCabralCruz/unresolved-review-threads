@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "types": ["node", "jest"],
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/src/*": ["./src/*"],
+      "@/test/*": ["./test/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["src", "test"]
+}

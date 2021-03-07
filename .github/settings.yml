@@ -1,7 +1,7 @@
 repository:
   name: unresolved-review-threads
   description: GitHub Action to prevent the merge of pull request having unresolved review threads
-  topics: github-actions, pull-requests, github-checks
+  topics: github-actions, github-checks, pull-requests
   private: false
   is_template: false
   has_issues: true
