@@ -14,8 +14,10 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
         types: [opened, reopened, labeled, unlabeled]
         branches:
           - main
+      
       issue_comment:
         types: [created]
+      
       pull_request_review_comment:
         types: [created, edited, deleted]
 
