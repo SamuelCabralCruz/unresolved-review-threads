@@ -5860,6 +5860,48 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 358:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.concludeCheckRun = exports.createCheckRun = void 0;
+const createCheckRun = (context, octokit, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
+    const checkRun = yield octokit.checks.create({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        head_sha: pullRequest.head.sha,
+        name: "Unresolved Review Threads",
+        status: "in_progress",
+        started_at: new Date().toISOString(),
+    });
+    return checkRun.data.id;
+});
+exports.createCheckRun = createCheckRun;
+const concludeCheckRun = (context, octokit, checkRunId, conclusion) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield octokit.checks.update({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        check_run_id: checkRunId,
+        status: "completed",
+        conclusion,
+    });
+});
+exports.concludeCheckRun = concludeCheckRun;
+
+
+/***/ }),
+
 /***/ 4073:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -6065,13 +6107,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.handleEvent = void 0;
 const github = __importStar(__nccwpck_require__(3737));
-const core_1 = __nccwpck_require__(9221);
 const unresolvedThread_1 = __nccwpck_require__(9796);
 const context_1 = __nccwpck_require__(8629);
 const summary_1 = __nccwpck_require__(1082);
 const comment_1 = __nccwpck_require__(4073);
 const label_1 = __nccwpck_require__(637);
 const eventCategory_1 = __nccwpck_require__(4154);
+const checkRun_1 = __nccwpck_require__(358);
 const SYNCHRONISATION_LABEL = 'syncUnresolved';
 const addSynchronisationLabel = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL);
@@ -6093,14 +6135,14 @@ const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
     console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`);
     return unresolvedThreads;
 });
-const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
+const reportUnresolvedThreads = (context, octokit, checkRunId, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
     const summary = summary_1.produceSummary(numberOfUnresolved);
     yield comment_1.createComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, summary);
     yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Failure - It seems there are some unresolved review threads!");
-    core_1.setFailed("Presence of unresolved review threads");
+    yield checkRun_1.concludeCheckRun(context, octokit, checkRunId, "failure");
 });
-const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
+const reportNoUnresolvedThreads = (context, octokit, checkRunId) => __awaiter(void 0, void 0, void 0, function* () {
     if (context.deleteResolvedCommentTrigger) {
         const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, '');
         if (commentIdToDelete != null)
@@ -6108,26 +6150,24 @@ const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
     }
     yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Success - No unresolved review threads");
+    yield checkRun_1.concludeCheckRun(context, octokit, checkRunId, "success");
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     const context = context_1.getContext();
     const octokit = github.getOctokit(context.token);
     switch (context.eventCategory) {
         case eventCategory_1.EventCategory.ISSUE_COMMENT_CREATED:
-            yield addSynchronisationLabel(context, octokit);
-            break;
         case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_CREATED:
         case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_EDITED:
         case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_DELETED:
-            yield addSynchronisationLabel(context, octokit);
-            break;
         case eventCategory_1.EventCategory.PULL_REQUEST_OPENED:
         case eventCategory_1.EventCategory.PULL_REQUEST_REOPENED:
         case eventCategory_1.EventCategory.PULL_REQUEST_LABELED:
         case eventCategory_1.EventCategory.PULL_REQUEST_UNLABELED:
+            const checkRunId = yield checkRun_1.createCheckRun(context, octokit, context.pullRequest);
             yield cleanUpSynchronisationTrigger(context, octokit);
             const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
-            anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
+            anyUnresolved ? yield reportUnresolvedThreads(context, octokit, checkRunId, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit, checkRunId);
             break;
     }
 });
@@ -6228,7 +6268,7 @@ const scanPullRequestForUnresolvedReviewThreads = (octokit, repoOwner, repoName,
     const reviewThreads = yield octokit.graphql(QUERY, variables);
     const unresolvedReviewThreads = reviewThreads.repository.pullRequest.reviewThreads.edges.filter(x => !x.node.isResolved);
     return {
-        anyUnresolved: !!unresolvedReviewThreads,
+        anyUnresolved: !!unresolvedReviewThreads.length,
         numberOfUnresolved: unresolvedReviewThreads.length,
     };
 });
