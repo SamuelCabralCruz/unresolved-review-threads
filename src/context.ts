@@ -12,6 +12,7 @@ export type UnresolvedActionContext = {
    resolvedCommentTrigger: string,
    deleteResolvedCommentTrigger: boolean,
    // event
+   runId: number,
    eventCategory: EventCategory,
    repoOwner: string,
    repoName: string,
@@ -44,6 +45,10 @@ const getDeleteResolvedCommentTrigger = (): boolean => {
       setFailed('Invalid deleteResolvedCommentTrigger')
    }
    return input === 'true'
+}
+
+const getRunId = (): number => {
+   return github.context.runId
 }
 
 const getEventCategory = (): EventCategory => {
@@ -82,6 +87,7 @@ export const getContext = (): UnresolvedActionContext => {
    const unresolvedLabel = getUnresolvedLabel()
    const resolvedCommentTrigger = getResolvedCommentTrigger()
    const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger()
+   const runId = getRunId()
    const eventCategory = getEventCategory()
    const repoOwner = getRepoOwner()
    const repoName = getRepoName()
@@ -96,6 +102,7 @@ export const getContext = (): UnresolvedActionContext => {
       unresolvedLabel,
       resolvedCommentTrigger,
       deleteResolvedCommentTrigger,
+      runId,
       eventCategory,
       repoOwner,
       repoName,

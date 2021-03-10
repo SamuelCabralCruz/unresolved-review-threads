@@ -2,11 +2,9 @@ import * as github from "@actions/github";
 import {scanPullRequestForUnresolvedReviewThreads, UnresolvedThreads} from "@/src/unresolvedThread";
 import {getContext, UnresolvedActionContext} from "@/src/context";
 import {OctokitInstance} from "@/src/octokitInstance";
-import {produceSummary} from "@/src/summary";
-import {createComment, deleteComment, findComment} from "@/src/comment";
+import {deleteComment, findComment} from "@/src/comment";
 import {addLabel, removeLabel} from "@/src/label";
-import {EventCategory} from "@/src/eventCategory";
-import {setPulLRequestStatus} from "@/src/status";
+import {setPullRequestStatus} from "@/src/status";
 
 // const SYNCHRONISATION_LABEL = 'syncUnresolved'
 
@@ -35,41 +33,22 @@ const checkForUnresolvedThreads = async (context: UnresolvedActionContext, octok
 }
 
 const reportUnresolvedThreads = async (context: UnresolvedActionContext, octokit: OctokitInstance, numberOfUnresolved: number) => {
-    const summary = produceSummary(numberOfUnresolved)
-    await createComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, summary)
     await addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
     console.log("Failure - It seems there are some unresolved review threads!")
-    // setFailed("Presence of unresolved review threads")
-    await setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure")
+    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure", context.runId)
 }
 
 const reportNoUnresolvedThreads = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
-    if (context.deleteResolvedCommentTrigger) {
-        // TODO: remove summary comment if needed
-        const commentIdToDelete = await findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, '')
-        if (commentIdToDelete != null) await deleteComment(octokit, context.repoOwner, context.repoName, commentIdToDelete)
-    }
     await removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
     console.log("Success - No unresolved review threads")
-    await setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success")
+    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success", context.runId)
 }
 
 export const handleEvent = async () => {
     const context = getContext()
     const octokit = github.getOctokit(context.token)
-    switch (context.eventCategory) {
-        case EventCategory.ISSUE_COMMENT_CREATED:
-        case EventCategory.PULL_REQUEST_REVIEW_COMMENT_CREATED:
-        case EventCategory.PULL_REQUEST_REVIEW_COMMENT_EDITED:
-        case EventCategory.PULL_REQUEST_REVIEW_COMMENT_DELETED:
-        case EventCategory.PULL_REQUEST_OPENED:
-        case EventCategory.PULL_REQUEST_REOPENED:
-        case EventCategory.PULL_REQUEST_LABELED:
-        case EventCategory.PULL_REQUEST_UNLABELED:
-            await setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending")
-            await cleanUpSynchronisationTrigger(context, octokit)
-            const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(context, octokit)
-            anyUnresolved ? await reportUnresolvedThreads(context, octokit, numberOfUnresolved) : await reportNoUnresolvedThreads(context, octokit)
-            break
-    }
+    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending", context.runId)
+    await cleanUpSynchronisationTrigger(context, octokit)
+    const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(context, octokit)
+    anyUnresolved ? await reportUnresolvedThreads(context, octokit, numberOfUnresolved) : await reportNoUnresolvedThreads(context, octokit)
 }

@@ -1,12 +1,12 @@
 import {OctokitInstance} from "@/src/octokitInstance";
-import {UnresolvedActionContext} from "@/src/context";
 import {PullRequest} from "@/src/PullRequest";
 
-export const setPulLRequestStatus = async (octokit: OctokitInstance, repoOwner: string, repoName: string, pullRequest: PullRequest, state: "pending" | "failure" | "success") => await octokit.repos.createCommitStatus({
+export const setPullRequestStatus = async (octokit: OctokitInstance, repoOwner: string, repoName: string, pullRequest: PullRequest, state: "pending" | "failure" | "success", runId: number) => await octokit.repos.createCommitStatus({
     owner: repoOwner,
     repo: repoName,
     sha: pullRequest.head.sha,
     state,
-    context: 'unresolved-review-threads',
-    description: "Unresolved Review Threads"
+    context: "Unresolved Review Threads",
+    description: `${3} unresolved threads identified`,
+    target_url: `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}`,
 })

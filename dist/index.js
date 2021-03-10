@@ -5946,6 +5946,9 @@ const getDeleteResolvedCommentTrigger = () => {
     }
     return input === 'true';
 };
+const getRunId = () => {
+    return github.context.runId;
+};
 const getEventCategory = () => {
     const eventName = github.context.eventName;
     const eventType = github.context.payload.action;
@@ -5976,6 +5979,7 @@ const getContext = () => {
     const unresolvedLabel = getUnresolvedLabel();
     const resolvedCommentTrigger = getResolvedCommentTrigger();
     const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger();
+    const runId = getRunId();
     const eventCategory = getEventCategory();
     const repoOwner = getRepoOwner();
     const repoName = getRepoName();
@@ -5985,6 +5989,7 @@ const getContext = () => {
         unresolvedLabel,
         resolvedCommentTrigger,
         deleteResolvedCommentTrigger,
+        runId,
         eventCategory,
         repoOwner,
         repoName,
@@ -6068,10 +6073,8 @@ exports.handleEvent = void 0;
 const github = __importStar(__nccwpck_require__(3737));
 const unresolvedThread_1 = __nccwpck_require__(9796);
 const context_1 = __nccwpck_require__(8629);
-const summary_1 = __nccwpck_require__(1082);
 const comment_1 = __nccwpck_require__(4073);
 const label_1 = __nccwpck_require__(637);
-const eventCategory_1 = __nccwpck_require__(4154);
 const status_1 = __nccwpck_require__(2886);
 const deleteSynchronisationComment = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, context.resolvedCommentTrigger);
@@ -6087,40 +6090,22 @@ const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
     return unresolvedThreads;
 });
 const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
-    const summary = summary_1.produceSummary(numberOfUnresolved);
-    yield comment_1.createComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, summary);
     yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Failure - It seems there are some unresolved review threads!");
-    yield status_1.setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure");
+    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure", context.runId);
 });
 const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    if (context.deleteResolvedCommentTrigger) {
-        const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, '');
-        if (commentIdToDelete != null)
-            yield comment_1.deleteComment(octokit, context.repoOwner, context.repoName, commentIdToDelete);
-    }
     yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Success - No unresolved review threads");
-    yield status_1.setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success");
+    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success", context.runId);
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     const context = context_1.getContext();
     const octokit = github.getOctokit(context.token);
-    switch (context.eventCategory) {
-        case eventCategory_1.EventCategory.ISSUE_COMMENT_CREATED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_CREATED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_EDITED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_REVIEW_COMMENT_DELETED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_OPENED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_REOPENED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_LABELED:
-        case eventCategory_1.EventCategory.PULL_REQUEST_UNLABELED:
-            yield status_1.setPulLRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending");
-            yield cleanUpSynchronisationTrigger(context, octokit);
-            const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
-            anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
-            break;
-    }
+    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending", context.runId);
+    yield cleanUpSynchronisationTrigger(context, octokit);
+    const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
+    anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
 });
 exports.handleEvent = handleEvent;
 
@@ -6178,35 +6163,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setPulLRequestStatus = void 0;
-const setPulLRequestStatus = (octokit, repoOwner, repoName, pullRequest, state) => __awaiter(void 0, void 0, void 0, function* () {
+exports.setPullRequestStatus = void 0;
+const setPullRequestStatus = (octokit, repoOwner, repoName, pullRequest, state, runId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield octokit.repos.createCommitStatus({
         owner: repoOwner,
         repo: repoName,
         sha: pullRequest.head.sha,
         state,
-        context: 'unresolved-review-threads',
-        description: "Unresolved Review Threads"
+        context: "Unresolved Review Threads",
+        description: `${3} unresolved threads identified`,
+        target_url: `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}`,
     });
 });
-exports.setPulLRequestStatus = setPulLRequestStatus;
-
-
-/***/ }),
-
-/***/ 1082:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.produceSummary = void 0;
-const produceSummary = (numberOfUnresolvedThreads) => {
-    return `
-        Unresolved Review Threads: ${numberOfUnresolvedThreads}
-    `;
-};
-exports.produceSummary = produceSummary;
+exports.setPullRequestStatus = setPullRequestStatus;
 
 
 /***/ }),
