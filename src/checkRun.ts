@@ -2,6 +2,10 @@ import {OctokitInstance} from "@/src/octokitInstance";
 import {UnresolvedActionContext} from "@/src/context";
 import {PullRequest} from "@/src/PullRequest";
 
+export const getCheckRuns = async (context: UnresolvedActionContext, octokit: OctokitInstance, pullRequest: PullRequest): Promise<void> => {
+    const checkRuns = await octokit.checks
+}
+
 export const createCheckRun = async (context: UnresolvedActionContext, octokit: OctokitInstance, pullRequest: PullRequest): Promise<number> => {
     const checkRun = await octokit.checks.create({
         owner: context.repoOwner,
