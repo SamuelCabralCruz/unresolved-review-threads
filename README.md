@@ -10,6 +10,7 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
     ```yaml
     name: 'Unresolved Review Threads'
     on:
+      push
       pull_request:
         types: [opened, reopened, labeled, unlabeled]
         branches:

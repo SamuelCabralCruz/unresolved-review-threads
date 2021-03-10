@@ -1,6 +1,7 @@
 export class EventCategory {
     private static allValues = new Map<string, EventCategory>()
 
+    public static PUSH = new EventCategory('push', '')
     public static PULL_REQUEST_OPENED = new EventCategory('pull_request', 'opened')
     public static PULL_REQUEST_REOPENED = new EventCategory('pull_request', 'reopened')
     public static PULL_REQUEST_LABELED = new EventCategory('pull_request', 'labeled')
@@ -14,10 +15,10 @@ export class EventCategory {
     eventType: string
     key: string
 
-    private constructor(eventName: string, eventType: string) {
+    private constructor(eventName: string, eventType: string, key?: string) {
         this.eventName = eventName
         this.eventType = eventType
-        this.key = [eventName, eventType].join('_')
+        this.key = eventType ? [eventName, eventType].join('_') : eventName
         EventCategory.allValues.set(this.key, this)
     }
 

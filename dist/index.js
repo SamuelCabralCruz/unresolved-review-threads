@@ -6019,10 +6019,10 @@ exports.getContext = getContext;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EventCategory = void 0;
 class EventCategory {
-    constructor(eventName, eventType) {
+    constructor(eventName, eventType, key) {
         this.eventName = eventName;
         this.eventType = eventType;
-        this.key = [eventName, eventType].join('_');
+        this.key = eventType ? [eventName, eventType].join('_') : eventName;
         EventCategory.allValues.set(this.key, this);
     }
     static from(eventName, eventType) {
@@ -6033,6 +6033,7 @@ class EventCategory {
 }
 exports.EventCategory = EventCategory;
 EventCategory.allValues = new Map();
+EventCategory.PUSH = new EventCategory('push', '');
 EventCategory.PULL_REQUEST_OPENED = new EventCategory('pull_request', 'opened');
 EventCategory.PULL_REQUEST_REOPENED = new EventCategory('pull_request', 'reopened');
 EventCategory.PULL_REQUEST_LABELED = new EventCategory('pull_request', 'labeled');
