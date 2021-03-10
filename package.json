@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "dist": "ncc build --source-map --license licenses.txt",
     "release": "npm run build && npm run dist"
   },
