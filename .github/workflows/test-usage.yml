@@ -1,6 +1,5 @@
 name: 'Test Usage'
 on:
-  push
   pull_request:
     types: [opened, reopened, labeled, unlabeled]
     branches:
