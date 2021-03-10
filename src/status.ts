@@ -7,4 +7,6 @@ export const setPulLRequestStatus = async (octokit: OctokitInstance, repoOwner: 
     repo: repoName,
     sha: pullRequest.head.sha,
     state,
+    context: 'unresolved-review-threads',
+    description: "Unresolved Review Threads"
 })

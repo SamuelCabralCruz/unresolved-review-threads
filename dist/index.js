@@ -6185,6 +6185,8 @@ const setPulLRequestStatus = (octokit, repoOwner, repoName, pullRequest, state) 
         repo: repoName,
         sha: pullRequest.head.sha,
         state,
+        context: 'unresolved-review-threads',
+        description: "Unresolved Review Threads"
     });
 });
 exports.setPulLRequestStatus = setPulLRequestStatus;
