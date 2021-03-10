@@ -6170,7 +6170,7 @@ const setPullRequestStatus = (octokit, repoOwner, repoName, pullRequest, state, 
         repo: repoName,
         sha: pullRequest.head.sha,
         state,
-        context: "Unresolved Review Threads",
+        context: "Test Usage / unresolvedReviewThreads",
         description: `${3} unresolved threads identified`,
         target_url: `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}`,
     });
