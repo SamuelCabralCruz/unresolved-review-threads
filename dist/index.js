@@ -5875,17 +5875,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteComment = exports.createComment = exports.findComment = void 0;
+exports.deleteComment = exports.findComment = void 0;
 const findComment = (octokit, repoOwner, repoName, pullRequest, content) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const comments = yield octokit.issues.listComments({ owner: repoOwner, repo: repoName, issue_number: pullRequest });
     return (_a = comments.data.find(x => x.body_text === content)) === null || _a === void 0 ? void 0 : _a.id;
 });
 exports.findComment = findComment;
-const createComment = (octokit, repoOwner, repoName, pullRequest, content) => __awaiter(void 0, void 0, void 0, function* () {
-    octokit.issues.createComment({ owner: repoOwner, repo: repoName, issue_number: pullRequest, body: content });
-});
-exports.createComment = createComment;
 const deleteComment = (octokit, repoOwner, repoName, commentId) => __awaiter(void 0, void 0, void 0, function* () {
     octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId });
 });
@@ -6087,13 +6083,10 @@ const context_1 = __nccwpck_require__(8629);
 const comment_1 = __nccwpck_require__(4073);
 const label_1 = __nccwpck_require__(637);
 const status_1 = __nccwpck_require__(2886);
-const deleteSynchronisationComment = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteSynchronisationCommentTrigger = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, context.resolvedCommentTrigger);
     if (commentIdToDelete != null)
         yield comment_1.deleteComment(octokit, context.repoOwner, context.repoName, commentIdToDelete);
-});
-const cleanUpSynchronisationTrigger = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield deleteSynchronisationComment(context, octokit);
 });
 const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number);
@@ -6113,8 +6106,7 @@ const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     const context = context_1.getContext();
     const octokit = github.getOctokit(context.token);
-    yield status_1.setCheckStatusAsPending(octokit, context);
-    yield cleanUpSynchronisationTrigger(context, octokit);
+    yield deleteSynchronisationCommentTrigger(context, octokit);
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
     anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
 });
@@ -6174,19 +6166,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = exports.setCheckStatusAsPending = void 0;
-const setCheckStatusAsPending = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
-    yield octokit.repos.createCommitStatus({
-        owner: context.repoOwner,
-        repo: context.repoName,
-        sha: context.pullRequest.head.sha,
-        state: "pending",
-        context: "Unresolved Review Threads",
-        description: "in progress...",
-        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
-    });
-});
-exports.setCheckStatusAsPending = setCheckStatusAsPending;
+exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = void 0;
 const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     return yield octokit.repos.createCommitStatus({
         owner: context.repoOwner,
