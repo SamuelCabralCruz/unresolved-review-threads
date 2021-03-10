@@ -48,7 +48,7 @@ const getDeleteResolvedCommentTrigger = (): boolean => {
 
 const getEventCategory = (): EventCategory => {
    const eventName = github.context.eventName
-   const eventType = github.context.action
+   const eventType = github.context.job
    const eventCategory = EventCategory.from(eventName, eventType)
    if (eventCategory == null) {
       console.log('Failure - Unknown event name and action combination')
@@ -76,7 +76,7 @@ const getPullRequest = (): PullRequest => {
 
 export const getContext = (): UnresolvedActionContext => {
    // console.log(`Event: ${github.context.eventName}`)
-   // console.log(JSON.stringify(github.context.payload))
+   console.log(JSON.stringify(github.context))
 
    const token = getToken()
    const unresolvedLabel = getUnresolvedLabel()
