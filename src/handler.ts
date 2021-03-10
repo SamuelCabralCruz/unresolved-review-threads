@@ -1,6 +1,4 @@
 import * as github from "@actions/github";
-
-import {setFailed} from "@actions/core";
 import {scanPullRequestForUnresolvedReviewThreads, UnresolvedThreads} from "@/src/unresolvedThread";
 import {getContext, UnresolvedActionContext} from "@/src/context";
 import {OctokitInstance} from "@/src/octokitInstance";
@@ -10,15 +8,15 @@ import {addLabel, removeLabel} from "@/src/label";
 import {EventCategory} from "@/src/eventCategory";
 import {concludeCheckRun, createCheckRun} from "@/src/checkRun";
 
-const SYNCHRONISATION_LABEL = 'syncUnresolved'
+// const SYNCHRONISATION_LABEL = 'syncUnresolved'
 
-const addSynchronisationLabel = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
-    await addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL)
-}
+// const addSynchronisationLabel = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
+//     await addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL)
+// }
 
-const removeSynchronisationLabel = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
-    await removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL)
-}
+// const removeSynchronisationLabel = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
+//     await removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL)
+// }
 
 const deleteSynchronisationComment = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
     const commentIdToDelete = await findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, context.resolvedCommentTrigger)
@@ -26,7 +24,7 @@ const deleteSynchronisationComment = async (context: UnresolvedActionContext, oc
 }
 
 const cleanUpSynchronisationTrigger = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
-    await removeSynchronisationLabel(context, octokit)
+    // await removeSynchronisationLabel(context, octokit)
     await deleteSynchronisationComment(context, octokit)
 }
 

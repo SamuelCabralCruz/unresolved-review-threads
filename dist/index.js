@@ -6013,6 +6013,7 @@ const getPullRequest = () => {
     return pullRequest;
 };
 const getContext = () => {
+    console.log(JSON.stringify(github.context));
     const token = getToken();
     const unresolvedLabel = getUnresolvedLabel();
     const resolvedCommentTrigger = getResolvedCommentTrigger();
@@ -6114,20 +6115,12 @@ const comment_1 = __nccwpck_require__(4073);
 const label_1 = __nccwpck_require__(637);
 const eventCategory_1 = __nccwpck_require__(4154);
 const checkRun_1 = __nccwpck_require__(358);
-const SYNCHRONISATION_LABEL = 'syncUnresolved';
-const addSynchronisationLabel = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL);
-});
-const removeSynchronisationLabel = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, SYNCHRONISATION_LABEL);
-});
 const deleteSynchronisationComment = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, context.resolvedCommentTrigger);
     if (commentIdToDelete != null)
         yield comment_1.deleteComment(octokit, context.repoOwner, context.repoName, commentIdToDelete);
 });
 const cleanUpSynchronisationTrigger = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield removeSynchronisationLabel(context, octokit);
     yield deleteSynchronisationComment(context, octokit);
 });
 const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {

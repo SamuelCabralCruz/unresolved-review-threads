@@ -76,7 +76,7 @@ const getPullRequest = (): PullRequest => {
 
 export const getContext = (): UnresolvedActionContext => {
    // console.log(`Event: ${github.context.eventName}`)
-   // console.log(JSON.stringify(github.context))
+   console.log(JSON.stringify(github.context))
 
    const token = getToken()
    const unresolvedLabel = getUnresolvedLabel()
