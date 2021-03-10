@@ -13,6 +13,8 @@ export type UnresolvedActionContext = {
    deleteResolvedCommentTrigger: boolean,
    // event
    runId: number,
+   workflowName: string,
+   jobName: string,
    eventCategory: EventCategory,
    repoOwner: string,
    repoName: string,
@@ -49,6 +51,14 @@ const getDeleteResolvedCommentTrigger = (): boolean => {
 
 const getRunId = (): number => {
    return github.context.runId
+}
+
+const getWorkflowName = (): string => {
+   return github.context.workflow
+}
+
+const getJobName = (): string => {
+   return github.context.job
 }
 
 const getEventCategory = (): EventCategory => {
@@ -88,6 +98,8 @@ export const getContext = (): UnresolvedActionContext => {
    const resolvedCommentTrigger = getResolvedCommentTrigger()
    const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger()
    const runId = getRunId()
+   const workflowName = getWorkflowName()
+   const jobName = getJobName()
    const eventCategory = getEventCategory()
    const repoOwner = getRepoOwner()
    const repoName = getRepoName()
@@ -103,6 +115,8 @@ export const getContext = (): UnresolvedActionContext => {
       resolvedCommentTrigger,
       deleteResolvedCommentTrigger,
       runId,
+      workflowName,
+      jobName,
       eventCategory,
       repoOwner,
       repoName,

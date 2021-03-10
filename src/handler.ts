@@ -4,7 +4,7 @@ import {getContext, UnresolvedActionContext} from "@/src/context";
 import {OctokitInstance} from "@/src/octokitInstance";
 import {deleteComment, findComment} from "@/src/comment";
 import {addLabel, removeLabel} from "@/src/label";
-import {setPullRequestStatus} from "@/src/status";
+import {setCheckStatusAsFailure, setCheckStatusAsSuccess} from "@/src/status";
 
 // const SYNCHRONISATION_LABEL = 'syncUnresolved'
 
@@ -35,19 +35,19 @@ const checkForUnresolvedThreads = async (context: UnresolvedActionContext, octok
 const reportUnresolvedThreads = async (context: UnresolvedActionContext, octokit: OctokitInstance, numberOfUnresolved: number) => {
     await addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
     console.log("Failure - It seems there are some unresolved review threads!")
-    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure", context.runId)
+    await setCheckStatusAsFailure(octokit, context, numberOfUnresolved)
 }
 
 const reportNoUnresolvedThreads = async (context: UnresolvedActionContext, octokit: OctokitInstance) => {
     await removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
     console.log("Success - No unresolved review threads")
-    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success", context.runId)
+    await setCheckStatusAsSuccess(octokit, context)
 }
 
 export const handleEvent = async () => {
     const context = getContext()
     const octokit = github.getOctokit(context.token)
-    await setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending", context.runId)
+    await setCheckStatusAsSuccess(octokit, context)
     await cleanUpSynchronisationTrigger(context, octokit)
     const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(context, octokit)
     anyUnresolved ? await reportUnresolvedThreads(context, octokit, numberOfUnresolved) : await reportNoUnresolvedThreads(context, octokit)

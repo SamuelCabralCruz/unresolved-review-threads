@@ -5949,6 +5949,12 @@ const getDeleteResolvedCommentTrigger = () => {
 const getRunId = () => {
     return github.context.runId;
 };
+const getWorkflowName = () => {
+    return github.context.workflow;
+};
+const getJobName = () => {
+    return github.context.job;
+};
 const getEventCategory = () => {
     const eventName = github.context.eventName;
     const eventType = github.context.payload.action;
@@ -5980,6 +5986,8 @@ const getContext = () => {
     const resolvedCommentTrigger = getResolvedCommentTrigger();
     const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger();
     const runId = getRunId();
+    const workflowName = getWorkflowName();
+    const jobName = getJobName();
     const eventCategory = getEventCategory();
     const repoOwner = getRepoOwner();
     const repoName = getRepoName();
@@ -5990,6 +5998,8 @@ const getContext = () => {
         resolvedCommentTrigger,
         deleteResolvedCommentTrigger,
         runId,
+        workflowName,
+        jobName,
         eventCategory,
         repoOwner,
         repoName,
@@ -6092,17 +6102,17 @@ const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
 const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
     yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Failure - It seems there are some unresolved review threads!");
-    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "failure", context.runId);
+    yield status_1.setCheckStatusAsFailure(octokit, context, numberOfUnresolved);
 });
 const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     console.log("Success - No unresolved review threads");
-    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "success", context.runId);
+    yield status_1.setCheckStatusAsSuccess(octokit, context);
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     const context = context_1.getContext();
     const octokit = github.getOctokit(context.token);
-    yield status_1.setPullRequestStatus(octokit, context.repoOwner, context.repoName, context.pullRequest, "pending", context.runId);
+    yield status_1.setCheckStatusAsSuccess(octokit, context);
     yield cleanUpSynchronisationTrigger(context, octokit);
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
     anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
@@ -6163,19 +6173,43 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setPullRequestStatus = void 0;
-const setPullRequestStatus = (octokit, repoOwner, repoName, pullRequest, state, runId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield octokit.repos.createCommitStatus({
-        owner: repoOwner,
-        repo: repoName,
-        sha: pullRequest.head.sha,
-        state,
-        context: "Test Usage / unresolvedReviewThreads (pull_request)",
-        description: `${3} unresolved threads identified`,
-        target_url: `https://github.com/${repoOwner}/${repoName}/actions/runs/${runId}`,
+exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = exports.setCheckStatusAsPending = void 0;
+const setCheckStatusAsPending = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    yield octokit.repos.createCommitStatus({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        sha: context.pullRequest.head.sha,
+        state: "pending",
+        context: `${context.workflowName} / ${context.jobName} (pull_request)`,
+        description: "in progress...",
+        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
     });
 });
-exports.setPullRequestStatus = setPullRequestStatus;
+exports.setCheckStatusAsPending = setCheckStatusAsPending;
+const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield octokit.repos.createCommitStatus({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        sha: context.pullRequest.head.sha,
+        state: "success",
+        context: `${context.workflowName} / ${context.jobName} (pull_request)`,
+        description: "no unresolved threads found",
+        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
+    });
+});
+exports.setCheckStatusAsSuccess = setCheckStatusAsSuccess;
+const setCheckStatusAsFailure = (octokit, context, numberOfUnresolvedThreads) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield octokit.repos.createCommitStatus({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        sha: context.pullRequest.head.sha,
+        state: "success",
+        context: `${context.workflowName} / ${context.jobName} (pull_request)`,
+        description: `${numberOfUnresolvedThreads} unresolved threads found`,
+        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
+    });
+});
+exports.setCheckStatusAsFailure = setCheckStatusAsFailure;
 
 
 /***/ }),
