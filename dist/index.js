@@ -6011,6 +6011,7 @@ class EventCategory {
     }
     static from(eventName, eventType) {
         const searchedKey = [eventName, eventType].join('_');
+        console.log(searchedKey);
         return EventCategory.allValues.get(searchedKey);
     }
 }

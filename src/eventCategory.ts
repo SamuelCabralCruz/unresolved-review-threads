@@ -23,6 +23,7 @@ export class EventCategory {
 
     static from(eventName: string, eventType: string): EventCategory | undefined {
         const searchedKey = [eventName, eventType].join('_')
+        console.log(searchedKey)
         return EventCategory.allValues.get(searchedKey)
     }
 }
