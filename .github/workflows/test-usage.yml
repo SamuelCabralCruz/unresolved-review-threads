@@ -18,6 +18,5 @@ jobs:
         with:
           unresolvedLabel: 'myCustomLabel'
           resolvedCommentTrigger: 'LGTM'
-          deleteResolvedCommentTrigger: 'false'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
