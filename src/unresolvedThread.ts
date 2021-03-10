@@ -46,7 +46,7 @@ export const scanPullRequestForUnresolvedReviewThreads = async (octokit: Octokit
     // console.log(JSON.stringify(reviewThreads))
     const unresolvedReviewThreads = reviewThreads.repository.pullRequest.reviewThreads.edges.filter(x => !x.node.isResolved)
     return {
-        anyUnresolved: !!unresolvedReviewThreads,
+        anyUnresolved: !!unresolvedReviewThreads.length,
         numberOfUnresolved: unresolvedReviewThreads.length,
     }
 }
