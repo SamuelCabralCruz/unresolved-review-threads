@@ -4,7 +4,7 @@ import {getContext, UnresolvedActionContext} from "@/src/context";
 import {OctokitInstance} from "@/src/octokitInstance";
 import {deleteComment, findComment} from "@/src/comment";
 import {addLabel, removeLabel} from "@/src/label";
-import {setCheckStatusAsFailure, setCheckStatusAsSuccess} from "@/src/status";
+import {setCheckStatusAsFailure, setCheckStatusAsPending, setCheckStatusAsSuccess} from "@/src/status";
 
 // const SYNCHRONISATION_LABEL = 'syncUnresolved'
 
@@ -47,7 +47,7 @@ const reportNoUnresolvedThreads = async (context: UnresolvedActionContext, octok
 export const handleEvent = async () => {
     const context = getContext()
     const octokit = github.getOctokit(context.token)
-    await setCheckStatusAsSuccess(octokit, context)
+    await setCheckStatusAsPending(octokit, context)
     await cleanUpSynchronisationTrigger(context, octokit)
     const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(context, octokit)
     anyUnresolved ? await reportUnresolvedThreads(context, octokit, numberOfUnresolved) : await reportNoUnresolvedThreads(context, octokit)

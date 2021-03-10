@@ -6113,7 +6113,7 @@ const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
     const context = context_1.getContext();
     const octokit = github.getOctokit(context.token);
-    yield status_1.setCheckStatusAsSuccess(octokit, context);
+    yield status_1.setCheckStatusAsPending(octokit, context);
     yield cleanUpSynchronisationTrigger(context, octokit);
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
     anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
