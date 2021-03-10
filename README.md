@@ -10,7 +10,6 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
     ```yaml
     name: 'Unresolved Review Threads'
     on:
-      push
       pull_request:
         types: [opened, reopened, labeled, unlabeled]
         branches:
@@ -38,23 +37,21 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 ## Workflow
 
 - This action flow is currently a lot more complicated than it would otherwise be if GitHub Actions could be triggered on
-  - `pull_request_review_comment` with types: ['created', 'resolved', 'unresolved']
+  - `pull_request_review_comment` with types: ['created', 'deleted', 'resolved', 'unresolved']
   - `issue_comment` with types: ['reaction']
   - For the time being, I opted for the following workaround flow:
-    - `pull_request` with types: ['opened', 'reopened', 'labeled', 'unlabeled']:
+    - verification flow
       - check for unresolved review threads
       - if any unresolved threads
-        - produce summary comment
         - add unresolved label (`unresolvedThreads` by default)
       - otherwise
-        - remove summary comment if present
         - remove unresolved label if present
-      - add check based on result
+      - add commit status based on result
       - remove synchronisation label if present
-      - remove resolved comment trigger if present (configurable)
-    - `pull_request_review_comment` with types: ['created', 'edited', 'deleted']
-      - this will add a synchronisation label (`syncUnresolved`) to the associated pull request (if not already present)
-    - `issue_comment` with types: ['created']
-      - if new comment match the configurable trigger (by default `ALL_RESOLVED`)
-        - add a synchronisation label (`syncUnresolved`) to the associated pull request (if not already present)
+      - remove synchronisation comment if present (configurable)
+    - will be triggered on
+      - `pull_request` with types: ['opened', 'reopened', 'labeled', 'unlabeled']
+      - `pull_request_review_comment` with types: ['created', 'edited', 'deleted']
+      - `issue_comment` with types: ['created']
+        - if new comment match the configurable trigger (by default `ALL_RESOLVED`)
 - This flow is far from perfect, but aim at producing the more friction less experience possible considering technological limitation
