@@ -1,20 +1,25 @@
 name: 'Test Usage'
 on:
   pull_request:
-    types: [opened, edited, labeled, reopened, review_requested]
-    branch:
+    types: [opened, reopened, labeled, unlabeled]
+    branches:
       - main
+
+  issue_comment:
+    types: [created]
+
   pull_request_review_comment:
     types: [created, edited, deleted]
 
 jobs:
-  build:
-    name: 'Unresolved Review Threads'
+  unresolvedReviewThreads:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          label: 'reviewThreadsResolved'
+          unresolvedLabel: 'myCustomLabel'
+          resolvedCommentTrigger: 'LGTM'
+          deleteResolvedCommentTrigger: 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

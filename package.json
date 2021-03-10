@@ -2,7 +2,7 @@
   "name": "unresolved-review-threads",
   "version": "1.0.0",
   "description": "GitHub Action to prevent the merge of pull request having unresolved review threads",
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.prod.json",
     "test": "jest",
