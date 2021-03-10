@@ -27,7 +27,7 @@ export const setCheckStatusAsFailure = async (octokit: OctokitInstance, context:
     owner: context.repoOwner,
     repo: context.repoName,
     sha: context.pullRequest.head.sha,
-    state: "success",
+    state: "failure",
     context: `${context.workflowName} / ${context.jobName} (pull_request)`,
     description: `${numberOfUnresolvedThreads} unresolved threads found`,
     target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
