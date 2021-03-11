@@ -5922,6 +5922,11 @@ exports.getContext = void 0;
 const core = __importStar(__nccwpck_require__(9221));
 const github = __importStar(__nccwpck_require__(3737));
 const eventType_1 = __nccwpck_require__(3405);
+const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true';
+const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads';
+const DEFAULT_VALUE_USE_COMMENT_TRIGGER = 'false';
+const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = 'LGTM';
+const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = 'true';
 const getBooleanInput = (inputName, defaultValue) => {
     const input = core.getInput(inputName) || defaultValue;
     if (!['true', 'false'].includes(input)) {
@@ -5931,28 +5936,28 @@ const getBooleanInput = (inputName, defaultValue) => {
     return input === 'true';
 };
 const getUseLabelTrigger = () => {
-    return getBooleanInput('useLabelTrigger', 'true');
+    return getBooleanInput('useLabelTrigger', DEFAULT_VALUE_USE_LABEL_TRIGGER);
 };
 const getUnresolvedLabel = (useLabelTrigger) => {
     let input = core.getInput('unresolvedLabel');
     if (!useLabelTrigger && input !== '')
         throw new Error("Can't define a unresolved label if use of label trigger is disabled");
-    return input || 'unresolvedThreads';
+    return input || DEFAULT_VALUE_UNRESOLVED_LABEL;
 };
 const getUseCommentTrigger = () => {
-    return getBooleanInput('useCommentTrigger', 'true');
+    return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER);
 };
 const getResolvedCommentTrigger = (useCommentTrigger) => {
     let input = core.getInput('resolvedCommentTrigger');
     if (!useCommentTrigger && input !== '')
         throw new Error("Can't define a resolved comment trigger if use of comment trigger is disabled");
-    return input || 'ALL_RESOLVED';
+    return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER;
 };
 const getDeleteResolvedCommentTrigger = (useCommentTrigger) => {
     let input = core.getInput('resolvedCommentTrigger');
     if (!useCommentTrigger && input !== '')
         throw new Error("Can't activate deletion of resolved comment trigger if use of comment trigger is disabled");
-    return input === 'true' || true;
+    return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true';
 };
 const getEventType = () => {
     const eventName = github.context.eventName;

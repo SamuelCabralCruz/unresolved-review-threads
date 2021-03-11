@@ -6,6 +6,12 @@ import {OctokitInstance} from "@/src/octokitInstance";
 import {TriggerType} from "@/src/triggerType";
 import {EventType, eventTypeFrom} from "@/src/eventType";
 
+const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true';
+const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads';
+const DEFAULT_VALUE_USE_COMMENT_TRIGGER = 'false';
+const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = 'LGTM';
+const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = 'true';
+
 type GitHubContextPullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
 type CommonContext = Readonly<{
@@ -53,29 +59,29 @@ const getBooleanInput = (inputName: string, defaultValue: 'true' | 'false'): boo
 }
 
 const getUseLabelTrigger = (): boolean => {
-   return getBooleanInput('useLabelTrigger', 'true')
+   return getBooleanInput('useLabelTrigger', DEFAULT_VALUE_USE_LABEL_TRIGGER)
 }
 
 const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
    let input = core.getInput('unresolvedLabel');
    if(!useLabelTrigger && input !== '') throw new Error("Can't define a unresolved label if use of label trigger is disabled")
-   return input || 'unresolvedThreads'
+   return input || DEFAULT_VALUE_UNRESOLVED_LABEL
 }
 
 const getUseCommentTrigger = (): boolean => {
-   return getBooleanInput('useCommentTrigger', 'true')
+   return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER)
 }
 
 const getResolvedCommentTrigger = (useCommentTrigger: boolean) : string => {
    let input = core.getInput('resolvedCommentTrigger');
    if(!useCommentTrigger && input !== '') throw new Error("Can't define a resolved comment trigger if use of comment trigger is disabled")
-   return input || 'ALL_RESOLVED'
+   return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER
 }
 
 const getDeleteResolvedCommentTrigger = (useCommentTrigger: boolean): boolean => {
    let input = core.getInput('resolvedCommentTrigger');
    if(!useCommentTrigger && input !== '') throw new Error("Can't activate deletion of resolved comment trigger if use of comment trigger is disabled")
-   return input === 'true' || true
+   return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true'
 }
 
 const getEventType = (): EventType => {
@@ -223,11 +229,6 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
          shouldProcessEvent: (useLabelTrigger && labelTriggeredEvent) || triggerType === 'other',
       } as PullRequestContext
    }
-
-   // console.log(`Event: ${github.context.eventName}`)
-   // console.log(`Repository Owner: ${repoOwner}`)
-   // console.log(`Repository Name: ${repoName}`)
-   // console.log(`Pull Request Number: ${pullRequest.number}`)
 
    console.log('Context')
    console.log(JSON.stringify(context, null, 2))
