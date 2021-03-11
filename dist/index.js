@@ -5875,13 +5875,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteComment = exports.findComment = void 0;
-const findComment = (octokit, repoOwner, repoName, pullRequest, content) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const comments = yield octokit.issues.listComments({ owner: repoOwner, repo: repoName, issue_number: pullRequest });
-    return (_a = comments.data.find(x => x.body_text === content)) === null || _a === void 0 ? void 0 : _a.id;
-});
-exports.findComment = findComment;
+exports.deleteComment = void 0;
 const deleteComment = (octokit, repoOwner, repoName, commentId) => __awaiter(void 0, void 0, void 0, function* () {
     octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId });
 });
@@ -5891,158 +5885,6 @@ exports.deleteComment = deleteComment;
 /***/ }),
 
 /***/ 8629:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getContext = void 0;
-const core = __importStar(__nccwpck_require__(9221));
-const github = __importStar(__nccwpck_require__(3737));
-const core_1 = __nccwpck_require__(9221);
-const eventCategory_1 = __nccwpck_require__(4154);
-const getToken = () => {
-    const token = process.env.GITHUB_TOKEN;
-    if (token == null) {
-        console.log("Failure - No token provided");
-        core_1.setFailed('Undefined GITHUB_TOKEN');
-    }
-    return token;
-};
-const getUnresolvedLabel = () => {
-    return core.getInput('unresolvedLabel');
-};
-const getResolvedCommentTrigger = () => {
-    return core.getInput('resolvedCommentTrigger');
-};
-const getDeleteResolvedCommentTrigger = () => {
-    const input = core.getInput('deleteResolvedCommentTrigger');
-    if (!['true', 'false'].includes(input)) {
-        console.log("Failure - Invalid value for deleteResolvedCommentTrigger");
-        core_1.setFailed('Invalid deleteResolvedCommentTrigger');
-    }
-    return input === 'true';
-};
-const getRunId = () => {
-    return github.context.runId;
-};
-const getWorkflowName = () => {
-    return github.context.workflow;
-};
-const getJobName = () => {
-    return github.context.job;
-};
-const getEventCategory = () => {
-    const eventName = github.context.eventName;
-    const eventType = github.context.payload.action;
-    const eventCategory = eventCategory_1.EventCategory.from(eventName, eventType);
-    if (eventCategory == null) {
-        console.log('Failure - Unknown event name and action combination');
-        core_1.setFailed('Unknown event name and action combination');
-    }
-    return eventCategory;
-};
-const getRepoOwner = () => {
-    return github.context.repo.owner;
-};
-const getRepoName = () => {
-    return github.context.repo.repo;
-};
-const getPullRequest = () => {
-    const pullRequest = github.context.payload.pull_request;
-    if (pullRequest == null) {
-        console.log('Failure - There is no pull request associated to the event payload');
-        core_1.setFailed('Pull request undefined');
-    }
-    return pullRequest;
-};
-const getContext = () => {
-    console.log(JSON.stringify(github.context));
-    const token = getToken();
-    const unresolvedLabel = getUnresolvedLabel();
-    const resolvedCommentTrigger = getResolvedCommentTrigger();
-    const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger();
-    const runId = getRunId();
-    const workflowName = getWorkflowName();
-    const jobName = getJobName();
-    const eventCategory = getEventCategory();
-    const repoOwner = getRepoOwner();
-    const repoName = getRepoName();
-    const pullRequest = getPullRequest();
-    return {
-        token,
-        unresolvedLabel,
-        resolvedCommentTrigger,
-        deleteResolvedCommentTrigger,
-        runId,
-        workflowName,
-        jobName,
-        eventCategory,
-        repoOwner,
-        repoName,
-        pullRequest,
-    };
-};
-exports.getContext = getContext;
-
-
-/***/ }),
-
-/***/ 4154:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EventCategory = void 0;
-class EventCategory {
-    constructor(eventName, eventType, key) {
-        this.eventName = eventName;
-        this.eventType = eventType;
-        this.key = eventType ? [eventName, eventType].join('_') : eventName;
-        EventCategory.allValues.set(this.key, this);
-    }
-    static from(eventName, eventType) {
-        const searchedKey = [eventName, eventType].join('_');
-        console.log(searchedKey);
-        return EventCategory.allValues.get(searchedKey);
-    }
-}
-exports.EventCategory = EventCategory;
-EventCategory.allValues = new Map();
-EventCategory.PUSH = new EventCategory('push', '');
-EventCategory.PULL_REQUEST_OPENED = new EventCategory('pull_request', 'opened');
-EventCategory.PULL_REQUEST_REOPENED = new EventCategory('pull_request', 'reopened');
-EventCategory.PULL_REQUEST_LABELED = new EventCategory('pull_request', 'labeled');
-EventCategory.PULL_REQUEST_UNLABELED = new EventCategory('pull_request', 'unlabeled');
-EventCategory.ISSUE_COMMENT_CREATED = new EventCategory('issue_comment', 'created');
-EventCategory.PULL_REQUEST_REVIEW_COMMENT_CREATED = new EventCategory('pull_request_review_comment', 'created');
-EventCategory.PULL_REQUEST_REVIEW_COMMENT_EDITED = new EventCategory('pull_request_review_comment', 'edited');
-EventCategory.PULL_REQUEST_REVIEW_COMMENT_DELETED = new EventCategory('pull_request_review_comment', 'deleted');
-
-
-/***/ }),
-
-/***/ 9697:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -6076,37 +5918,283 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.handleEvent = void 0;
+exports.getContext = void 0;
+const core = __importStar(__nccwpck_require__(9221));
+const core_1 = __nccwpck_require__(9221);
 const github = __importStar(__nccwpck_require__(3737));
+const eventType_1 = __nccwpck_require__(3405);
+const getBooleanInput = (inputName) => {
+    const input = core.getInput(inputName);
+    if (!['true', 'false'].includes(input)) {
+        console.log(`Failure - Invalid value for ${inputName}`);
+        core_1.setFailed(`Invalid ${inputName}`);
+    }
+    return input === 'true';
+};
+const getUseLabelTrigger = () => {
+    return getBooleanInput('useLabelTrigger');
+};
+const getUnresolvedLabel = (useLabelTrigger) => {
+    let input = core.getInput('unresolvedLabel');
+    if (!useLabelTrigger && input != null)
+        throw new Error("Can't define a unresolved label if use of label trigger is disabled");
+    return input || 'unresolvedThreads';
+};
+const getUseCommentTrigger = () => {
+    return getBooleanInput('useCommentTrigger');
+};
+const getResolvedCommentTrigger = (useCommentTrigger) => {
+    let input = core.getInput('resolvedCommentTrigger');
+    if (!useCommentTrigger && input != null)
+        throw new Error("Can't define a resolved comment trigger if use of comment trigger is disabled");
+    return input || 'ALL_RESOLVED';
+};
+const getDeleteResolvedCommentTrigger = (useCommentTrigger) => {
+    let input = core.getInput('resolvedCommentTrigger');
+    if (!useCommentTrigger && input != null)
+        throw new Error("Can't activate deletion of resolved comment trigger if use of comment trigger is disabled");
+    return input === 'true' || true;
+};
+const getEventType = () => {
+    const eventName = github.context.eventName;
+    const eventAction = github.context.payload.action;
+    return eventType_1.eventTypeFrom(eventName, eventAction);
+};
+const getTriggerType = (eventType) => {
+    switch (eventType) {
+        case eventType_1.EventType.ISSUE_COMMENT_CREATED:
+            return 'comment';
+        case eventType_1.EventType.PULL_REQUEST_LABELED:
+        case eventType_1.EventType.PULL_REQUEST_UNLABELED:
+            return 'label';
+        default:
+            return 'other';
+    }
+};
+const getRunId = () => {
+    return github.context.runId;
+};
+const getWorkflowName = () => {
+    return github.context.workflow;
+};
+const getJobName = () => {
+    return github.context.job;
+};
+const getRepoOwner = () => {
+    return github.context.repo.owner;
+};
+const getRepoName = () => {
+    return github.context.repo.repo;
+};
+const getCommentCreatedPullRequest = (octokit, repoOwner, repoName) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    if (((_a = github.context.payload.issue) === null || _a === void 0 ? void 0 : _a.pull_request) == null) {
+        return undefined;
+    }
+    const pullRequestNumber = github.context.payload.issue.number;
+    const pullRequest = yield octokit.pulls.get({ owner: repoOwner, repo: repoName, pull_number: pullRequestNumber });
+    return {
+        number: pullRequestNumber,
+        headRef: pullRequest.data.head.sha,
+        labels: pullRequest.data.labels,
+    };
+});
+const getPullRequest = () => {
+    const pullRequest = github.context.payload.pull_request;
+    if (pullRequest == null) {
+        throw new Error('No associated pull request');
+    }
+    return {
+        number: pullRequest.number,
+        headRef: pullRequest.head.sha,
+        labels: pullRequest.labels,
+    };
+};
+const getCommentId = () => {
+    return github.context.payload.comment.id;
+};
+const getCommentBody = () => {
+    return github.context.payload.comment.body;
+};
+const isLabelTriggeredEvent = (triggerType) => {
+    return triggerType === 'label';
+};
+const isCommentTriggeredEvent = (triggerType, commentBody, resolvedCommentTrigger, pullRequest) => {
+    if (triggerType === 'comment') {
+        return commentBody === resolvedCommentTrigger && pullRequest != null;
+    }
+    return false;
+};
+const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(JSON.stringify(github.context));
+    const useLabelTrigger = getUseLabelTrigger();
+    const unresolvedLabel = getUnresolvedLabel(useLabelTrigger);
+    const useCommentTrigger = getUseCommentTrigger();
+    const resolvedCommentTrigger = getResolvedCommentTrigger(useCommentTrigger);
+    const deleteResolvedCommentTrigger = getDeleteResolvedCommentTrigger(useCommentTrigger);
+    const eventType = getEventType();
+    const triggerType = getTriggerType(eventType);
+    const runId = getRunId();
+    const workflowName = getWorkflowName();
+    const jobName = getJobName();
+    const repoOwner = getRepoOwner();
+    const repoName = getRepoName();
+    const commonContext = {
+        useLabelTrigger,
+        unresolvedLabel,
+        useCommentTrigger,
+        resolvedCommentTrigger,
+        deleteResolvedCommentTrigger,
+        eventType,
+        triggerType,
+        runId,
+        workflowName,
+        jobName,
+        repoOwner,
+        repoName,
+        labelTriggeredEvent: false,
+        commentTriggeredEvent: false,
+        shouldProcessEvent: false,
+    };
+    if (!commonContext.useLabelTrigger && !commonContext.useCommentTrigger)
+        throw new Error("At least one type of trigger must be enabled");
+    let context;
+    if (triggerType === 'comment') {
+        const pullRequest = yield getCommentCreatedPullRequest(octokit, repoOwner, repoName);
+        const commentId = getCommentId();
+        const commentBody = getCommentBody();
+        const commentTriggeredEvent = isCommentTriggeredEvent(triggerType, commentBody, resolvedCommentTrigger, pullRequest);
+        context = Object.assign(Object.assign({}, commonContext), { pullRequest,
+            commentId,
+            commentBody, commentTriggeredEvent: commentTriggeredEvent, shouldProcessEvent: useCommentTrigger && commentTriggeredEvent });
+    }
+    else {
+        const pullRequest = getPullRequest();
+        const labelTriggeredEvent = isLabelTriggeredEvent(triggerType);
+        context = Object.assign(Object.assign({}, commonContext), { pullRequest,
+            labelTriggeredEvent, shouldProcessEvent: useLabelTrigger && labelTriggeredEvent });
+    }
+    return context;
+});
+exports.getContext = getContext;
+
+
+/***/ }),
+
+/***/ 3405:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.eventTypeFrom = exports.EventType = void 0;
+var EventType;
+(function (EventType) {
+    EventType["PULL_REQUEST_OPENED"] = "pull_request_opened";
+    EventType["PULL_REQUEST_REOPENED"] = "pull_request_reopened";
+    EventType["PULL_REQUEST_LABELED"] = "pull_request_labeled";
+    EventType["PULL_REQUEST_UNLABELED"] = "pull_request_unlabeled";
+    EventType["ISSUE_COMMENT_CREATED"] = "issue_comment_created";
+    EventType["PULL_REQUEST_REVIEW_COMMENT_CREATED"] = "pull_request_review_comment_created";
+    EventType["PULL_REQUEST_REVIEW_COMMENT_EDITED"] = "pull_request_review_comment_edited";
+    EventType["PULL_REQUEST_REVIEW_COMMENT_DELETED"] = "pull_request_review_comment_deleted";
+})(EventType = exports.EventType || (exports.EventType = {}));
+const eventTypeFrom = (eventName, eventAction) => {
+    switch (eventName) {
+        case 'pull_request':
+            switch (eventAction) {
+                case 'opened':
+                    return EventType.PULL_REQUEST_OPENED;
+                case 'reopened':
+                    return EventType.PULL_REQUEST_REOPENED;
+                case 'labeled':
+                    return EventType.PULL_REQUEST_LABELED;
+                case 'unlabeled':
+                    return EventType.PULL_REQUEST_UNLABELED;
+                default:
+                    throw new Error('Unknown combination of event name and action');
+            }
+        case 'issue_comment':
+            switch (eventAction) {
+                case 'created':
+                    return EventType.ISSUE_COMMENT_CREATED;
+                default:
+                    throw new Error('Unknown combination of event name and action');
+            }
+        case 'pull_request_review_comment':
+            switch (eventAction) {
+                case 'created':
+                    return EventType.PULL_REQUEST_REVIEW_COMMENT_CREATED;
+                case 'edited':
+                    return EventType.PULL_REQUEST_REVIEW_COMMENT_EDITED;
+                case 'deleted':
+                    return EventType.PULL_REQUEST_REVIEW_COMMENT_DELETED;
+                default:
+                    throw new Error('Unknown combination of event name and action');
+            }
+        default:
+            throw new Error('Unknown combination of event name and action');
+    }
+};
+exports.eventTypeFrom = eventTypeFrom;
+
+
+/***/ }),
+
+/***/ 9697:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.handleEvent = void 0;
 const unresolvedThread_1 = __nccwpck_require__(9796);
 const context_1 = __nccwpck_require__(8629);
 const comment_1 = __nccwpck_require__(4073);
 const label_1 = __nccwpck_require__(637);
 const status_1 = __nccwpck_require__(2886);
+const github_1 = __nccwpck_require__(3737);
+const getOctokitClient = () => {
+    const token = process.env.GITHUB_TOKEN;
+    if (token == null) {
+        throw new Error('Undefined GITHUB_TOKEN env variable');
+    }
+    return github_1.getOctokit(token);
+};
 const deleteSynchronisationCommentTrigger = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    const commentIdToDelete = yield comment_1.findComment(octokit, context.repoOwner, context.repoName, context.pullRequest.number, context.resolvedCommentTrigger);
-    if (commentIdToDelete != null)
-        yield comment_1.deleteComment(octokit, context.repoOwner, context.repoName, commentIdToDelete);
+    if (context.deleteResolvedCommentTrigger != null)
+        yield comment_1.deleteComment(octokit, context.repoOwner, context.repoName, context.commentId);
 });
 const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number);
-    console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`);
     return unresolvedThreads;
 });
 const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
-    yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
-    console.log("Failure - It seems there are some unresolved review threads!");
+    if (context.useLabelTrigger)
+        yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     yield status_1.setCheckStatusAsFailure(octokit, context, numberOfUnresolved);
 });
 const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
-    console.log("Success - No unresolved review threads");
+    if (context.useLabelTrigger)
+        yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
     yield status_1.setCheckStatusAsSuccess(octokit, context);
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
-    const context = context_1.getContext();
-    const octokit = github.getOctokit(context.token);
-    yield deleteSynchronisationCommentTrigger(context, octokit);
+    const octokit = getOctokitClient();
+    const context = yield context_1.getContext(octokit);
+    if (!context.shouldProcessEvent)
+        return;
+    if (context.commentTriggeredEvent)
+        yield deleteSynchronisationCommentTrigger(context, octokit);
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(context, octokit);
     anyUnresolved ? yield reportUnresolvedThreads(context, octokit, numberOfUnresolved) : yield reportNoUnresolvedThreads(context, octokit);
 });
@@ -6171,7 +6259,7 @@ const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, 
     return yield octokit.repos.createCommitStatus({
         owner: context.repoOwner,
         repo: context.repoName,
-        sha: context.pullRequest.head.sha,
+        sha: context.pullRequest.headRef,
         state: "success",
         context: "Unresolved Review Threads",
         description: "no unresolved threads found",
@@ -6183,7 +6271,7 @@ const setCheckStatusAsFailure = (octokit, context, numberOfUnresolvedThreads) =>
     return yield octokit.repos.createCommitStatus({
         owner: context.repoOwner,
         repo: context.repoName,
-        sha: context.pullRequest.head.sha,
+        sha: context.pullRequest.headRef,
         state: "failure",
         context: "Unresolved Review Threads",
         description: `${numberOfUnresolvedThreads} unresolved threads found`,

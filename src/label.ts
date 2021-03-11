@@ -1,4 +1,4 @@
-import {PullRequest} from "@/src/PullRequest";
+import {PullRequest} from "@/src/pullRequest";
 import {OctokitInstance} from "@/src/octokitInstance";
 
 export const hasLabel = (pullRequest: PullRequest, labelName: string): boolean => {
