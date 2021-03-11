@@ -5925,6 +5925,7 @@ const eventType_1 = __nccwpck_require__(3405);
 const getBooleanInput = (inputName, defaultValue) => {
     const input = core.getInput(inputName) || defaultValue;
     if (!['true', 'false'].includes(input)) {
+        console.log(`boolean input: ${input}`);
         throw new Error(`Invalid ${inputName}`);
     }
     return input === 'true';
