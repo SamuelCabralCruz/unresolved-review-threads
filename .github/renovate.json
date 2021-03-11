@@ -4,9 +4,7 @@
   "ignoreDeps": [],
   "packageRules": [
     {
-      "packageNames": [
-        "node"
-      ],
+      "packageNames": ["node"],
       "enabled": false
     },
     {

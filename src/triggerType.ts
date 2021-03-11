@@ -1,1 +1,1 @@
-export type TriggerType = 'label' | 'comment' | 'other';
+export type TriggerType = 'label' | 'comment' | 'other'
