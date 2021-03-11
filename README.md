@@ -10,31 +10,31 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
     ```yaml
     name: 'Unresolved Review Threads'
     on:
+      pull_request_review_comment:
+        types: [created, edited, deleted]
+
+      issue_comment:
+        types: [created]
+
       pull_request:
         types: [opened, reopened, labeled, unlabeled]
         branches:
           - main
-      
-      issue_comment:
-        types: [created]
-      
-      pull_request_review_comment:
-        types: [created, edited, deleted]
 
     jobs:
       unresolvedReviewThreads:
         runs-on: ubuntu-latest
         steps:
           - uses: SamuelCabralCruz/unresolved-review-threads@v1.x
-            with:
-              unresolvedLabel: 'myCustomLabel'
-              resolvedCommentTrigger: 'LGTM'
-              deleteResolvedCommentTrigger: 'false'
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     ```
 - If no label input is provided, the action will use a label name `unresolvedThreads` by default.
 - Don't forget to enforce the check in your branch rule settings
+
+## Inputs
+
+TODO: add inputs description and show different version of the file
   
 ## Workflow
 
