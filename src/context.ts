@@ -1,10 +1,10 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import {EventType, eventTypeFrom} from "@/src/eventType";
 import {PullRequest} from "@/src/pullRequest";
 import {RestEndpointMethodTypes} from "@octokit/rest";
 import {OctokitInstance} from "@/src/octokitInstance";
 import {TriggerType} from "@/src/triggerType";
+import {EventType, eventTypeFrom} from "@/src/eventType";
 
 type GitHubContextPullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
