@@ -1,6 +1,6 @@
 # unresolved-review-threads
 
-GitHub Action to prevent the merge of pull request having unresolved review threads
+GitHub Action to prevent the merge of pull request having unresolved review threads.
 
 [![Build Status](https://github.com/SamuelCabralCruz/unresolved-review-threads/workflows/CI%20-%20Pipeline/badge.svg)](https://github.com/SamuelCabralCruz/unresolved-review-threads/actions)
 
@@ -29,16 +29,17 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
             env:
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     ```
-- If no label input is provided, the action will use a label name `unresolvedThreads` by default.
+- If no label input is provided, the action will use a label named `unresolvedThreads` by default.
 - Don't forget to enforce the check in your branch rule settings
 
 ## Inputs
 
-TODO: add inputs description and show different version of the file
+TODO: add inputs description and show different versions of the file
   
 ## Workflow
 
 - This action flow is currently a lot more complicated than it would otherwise be if GitHub Actions could be triggered on
+  TODO: Link support tickets here
   - `pull_request_review_comment` with types: ['created', 'deleted', 'resolved', 'unresolved']
   - `issue_comment` with types: ['reaction']
   - For the time being, I opted for the following workaround flow:

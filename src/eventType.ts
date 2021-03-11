@@ -9,7 +9,7 @@ export enum EventType {
     PULL_REQUEST_REVIEW_COMMENT_DELETED = 'pull_request_review_comment_deleted',
 }
 
-export const eventTypeFrom = (eventName: string, eventAction: string): EventType => {
+export const eventTypeFrom = (eventName: string, eventAction: string): EventType | undefined => {
     switch (eventName) {
         case 'pull_request':
             switch (eventAction) {
@@ -22,14 +22,14 @@ export const eventTypeFrom = (eventName: string, eventAction: string): EventType
                 case 'unlabeled':
                     return EventType.PULL_REQUEST_UNLABELED
                 default:
-                    throw new Error('Unknown combination of event name and action')
+                    return undefined
             }
         case 'issue_comment':
             switch (eventAction) {
                 case 'created':
                     return EventType.ISSUE_COMMENT_CREATED
                 default:
-                    throw new Error('Unknown combination of event name and action')
+                    return undefined
             }
         case 'pull_request_review_comment':
             switch (eventAction) {
@@ -40,9 +40,9 @@ export const eventTypeFrom = (eventName: string, eventAction: string): EventType
                 case 'deleted':
                     return EventType.PULL_REQUEST_REVIEW_COMMENT_DELETED
                 default:
-                    throw new Error('Unknown combination of event name and action')
+                    return undefined
             }
         default:
-            throw new Error('Unknown combination of event name and action')
+            return undefined
     }
 }
