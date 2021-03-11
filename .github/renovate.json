@@ -10,27 +10,32 @@
     {
       "packagePatterns": [".*"],
       "groupName": "Tools",
-      "schedule": ["before 6am on Monday"]
+      "schedule": ["before 6am on Sunday"]
     },
     {
       "depTypeList": ["action"],
       "groupName": "Actions",
-      "schedule": ["before 6am on Monday"]
+      "schedule": ["before 6am on Sunday"]
     },
     {
       "packagePatterns": ["^npm"],
       "groupName": "Node Package Manager",
-      "schedule": ["before 6am on Monday"]
+      "schedule": ["before 6am on Sunday"]
     },
     {
       "packagePatterns": ["^typescript$", "^ts", "tsconfig-paths-webpack-plugin"],
       "groupName": "Typescript",
-      "schedule": ["before 6am on Monday"]
+      "schedule": ["before 6am on Sunday"]
+    },
+    {
+      "packagePatterns": ["^eslint", "^@typescript-eslint", "prettier"],
+      "groupName": "Lint",
+      "schedule": ["before 6am on Sunday"]
     },
     {
       "packagePatterns": ["jest", "@types/jest", "ts-jest"],
       "groupName": "Test",
-      "schedule": ["before 6am on Monday"]
+      "schedule": ["before 6am on Sunday"]
     }
   ],
   "masterIssue": true
