@@ -1,11 +1,10 @@
 import * as core from "@actions/core";
-import {setFailed} from "@actions/core";
 import * as github from "@actions/github";
-import {EventType, eventTypeFrom} from "@/src/eventType";
 import {PullRequest} from "@/src/pullRequest";
 import {RestEndpointMethodTypes} from "@octokit/rest";
 import {OctokitInstance} from "@/src/octokitInstance";
 import {TriggerType} from "@/src/triggerType";
+import {EventType, eventTypeFrom} from "@/src/eventType";
 
 type GitHubContextPullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
@@ -42,17 +41,19 @@ export type PullRequestContext = CommonContext & Readonly<{
 
 export type UnresolvedActionContext = CommentCreatedContext | PullRequestContext
 
-const getBooleanInput = (inputName: string): boolean => {
-   const input = core.getInput(inputName)
+const getBooleanInput = (inputName: string, defaultValue: 'true' | 'false'): boolean => {
+   const input = core.getInput(inputName) || defaultValue
    if(!['true', 'false'].includes(input)) {
-      console.log(`Failure - Invalid value for ${inputName}`)
-      setFailed(`Invalid ${inputName}`)
+      console.log(`boolean input: ${input}`)
+      // console.log(`Failure - Invalid value for ${inputName}`)
+      // setFailed(`Invalid ${inputName}`)
+      throw new Error(`Invalid ${inputName}`)
    }
    return input === 'true'
 }
 
 const getUseLabelTrigger = (): boolean => {
-   return getBooleanInput('useLabelTrigger')
+   return getBooleanInput('useLabelTrigger', 'true')
 }
 
 const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
@@ -62,7 +63,7 @@ const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
 }
 
 const getUseCommentTrigger = (): boolean => {
-   return getBooleanInput('useCommentTrigger')
+   return getBooleanInput('useCommentTrigger', 'true')
 }
 
 const getResolvedCommentTrigger = (useCommentTrigger: boolean) : string => {
@@ -162,7 +163,7 @@ const isCommentTriggeredEvent = (triggerType: TriggerType, commentBody: string, 
 }
 
 export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedActionContext> => {
-   console.log(JSON.stringify(github.context))
+   console.log(JSON.stringify(github.context, null, 2))
 
    const useLabelTrigger = getUseLabelTrigger();
    const unresolvedLabel = getUnresolvedLabel(useLabelTrigger);
@@ -219,7 +220,7 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
          ...commonContext,
          pullRequest,
          labelTriggeredEvent,
-         shouldProcessEvent: useLabelTrigger && labelTriggeredEvent,
+         shouldProcessEvent: (useLabelTrigger && labelTriggeredEvent) || triggerType === 'other',
       } as PullRequestContext
    }
 
@@ -227,6 +228,9 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
    // console.log(`Repository Owner: ${repoOwner}`)
    // console.log(`Repository Name: ${repoName}`)
    // console.log(`Pull Request Number: ${pullRequest.number}`)
+
+   console.log('Context')
+   console.log(JSON.stringify(context, null, 2))
 
    return context
 }

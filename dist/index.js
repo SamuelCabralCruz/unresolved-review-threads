@@ -5920,19 +5920,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getContext = void 0;
 const core = __importStar(__nccwpck_require__(9221));
-const core_1 = __nccwpck_require__(9221);
 const github = __importStar(__nccwpck_require__(3737));
 const eventType_1 = __nccwpck_require__(3405);
-const getBooleanInput = (inputName) => {
-    const input = core.getInput(inputName);
+const getBooleanInput = (inputName, defaultValue) => {
+    const input = core.getInput(inputName) || defaultValue;
     if (!['true', 'false'].includes(input)) {
-        console.log(`Failure - Invalid value for ${inputName}`);
-        core_1.setFailed(`Invalid ${inputName}`);
+        console.log(`boolean input: ${input}`);
+        throw new Error(`Invalid ${inputName}`);
     }
     return input === 'true';
 };
 const getUseLabelTrigger = () => {
-    return getBooleanInput('useLabelTrigger');
+    return getBooleanInput('useLabelTrigger', 'true');
 };
 const getUnresolvedLabel = (useLabelTrigger) => {
     let input = core.getInput('unresolvedLabel');
@@ -5941,7 +5940,7 @@ const getUnresolvedLabel = (useLabelTrigger) => {
     return input || 'unresolvedThreads';
 };
 const getUseCommentTrigger = () => {
-    return getBooleanInput('useCommentTrigger');
+    return getBooleanInput('useCommentTrigger', 'true');
 };
 const getResolvedCommentTrigger = (useCommentTrigger) => {
     let input = core.getInput('resolvedCommentTrigger');
@@ -6026,7 +6025,7 @@ const isCommentTriggeredEvent = (triggerType, commentBody, resolvedCommentTrigge
     return false;
 };
 const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(JSON.stringify(github.context));
+    console.log(JSON.stringify(github.context, null, 2));
     const useLabelTrigger = getUseLabelTrigger();
     const unresolvedLabel = getUnresolvedLabel(useLabelTrigger);
     const useCommentTrigger = getUseCommentTrigger();
@@ -6072,8 +6071,10 @@ const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
         const pullRequest = getPullRequest();
         const labelTriggeredEvent = isLabelTriggeredEvent(triggerType);
         context = Object.assign(Object.assign({}, commonContext), { pullRequest,
-            labelTriggeredEvent, shouldProcessEvent: useLabelTrigger && labelTriggeredEvent });
+            labelTriggeredEvent, shouldProcessEvent: (useLabelTrigger && labelTriggeredEvent) || triggerType === 'other' });
     }
+    console.log('Context');
+    console.log(JSON.stringify(context, null, 2));
     return context;
 });
 exports.getContext = getContext;
@@ -6176,16 +6177,19 @@ const deleteSynchronisationCommentTrigger = (context, octokit) => __awaiter(void
 });
 const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number);
+    console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`);
     return unresolvedThreads;
 });
 const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
     if (context.useLabelTrigger)
         yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
+    console.log("Failure - It seems there are some unresolved review threads!");
     yield status_1.setCheckStatusAsFailure(octokit, context, numberOfUnresolved);
 });
 const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     if (context.useLabelTrigger)
         yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
+    console.log("Success - No unresolved review threads");
     yield status_1.setCheckStatusAsSuccess(octokit, context);
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {
