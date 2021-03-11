@@ -42,8 +42,8 @@ export type PullRequestContext = CommonContext & Readonly<{
 
 export type UnresolvedActionContext = CommentCreatedContext | PullRequestContext
 
-const getBooleanInput = (inputName: string): boolean => {
-   const input = core.getInput(inputName)
+const getBooleanInput = (inputName: string, defaultValue: 'true' | 'false'): boolean => {
+   const input = core.getInput(inputName) || defaultValue
    if(!['true', 'false'].includes(input)) {
       console.log(`Failure - Invalid value for ${inputName}`)
       setFailed(`Invalid ${inputName}`)
@@ -52,7 +52,7 @@ const getBooleanInput = (inputName: string): boolean => {
 }
 
 const getUseLabelTrigger = (): boolean => {
-   return getBooleanInput('useLabelTrigger')
+   return getBooleanInput('useLabelTrigger', 'true')
 }
 
 const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
@@ -62,7 +62,7 @@ const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
 }
 
 const getUseCommentTrigger = (): boolean => {
-   return getBooleanInput('useCommentTrigger')
+   return getBooleanInput('useCommentTrigger', 'true')
 }
 
 const getResolvedCommentTrigger = (useCommentTrigger: boolean) : string => {
