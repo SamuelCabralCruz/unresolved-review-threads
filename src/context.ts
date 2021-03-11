@@ -1,5 +1,4 @@
 import * as core from "@actions/core";
-import {setFailed} from "@actions/core";
 import * as github from "@actions/github";
 import {EventType, eventTypeFrom} from "@/src/eventType";
 import {PullRequest} from "@/src/pullRequest";
@@ -45,8 +44,9 @@ export type UnresolvedActionContext = CommentCreatedContext | PullRequestContext
 const getBooleanInput = (inputName: string, defaultValue: 'true' | 'false'): boolean => {
    const input = core.getInput(inputName) || defaultValue
    if(!['true', 'false'].includes(input)) {
-      console.log(`Failure - Invalid value for ${inputName}`)
-      setFailed(`Invalid ${inputName}`)
+      // console.log(`Failure - Invalid value for ${inputName}`)
+      // setFailed(`Invalid ${inputName}`)
+      throw new Error(`Invalid ${inputName}`)
    }
    return input === 'true'
 }

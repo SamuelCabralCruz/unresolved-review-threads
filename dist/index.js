@@ -5920,19 +5920,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getContext = void 0;
 const core = __importStar(__nccwpck_require__(9221));
-const core_1 = __nccwpck_require__(9221);
 const github = __importStar(__nccwpck_require__(3737));
 const eventType_1 = __nccwpck_require__(3405);
-const getBooleanInput = (inputName) => {
-    const input = core.getInput(inputName);
+const getBooleanInput = (inputName, defaultValue) => {
+    const input = core.getInput(inputName) || defaultValue;
     if (!['true', 'false'].includes(input)) {
-        console.log(`Failure - Invalid value for ${inputName}`);
-        core_1.setFailed(`Invalid ${inputName}`);
+        throw new Error(`Invalid ${inputName}`);
     }
     return input === 'true';
 };
 const getUseLabelTrigger = () => {
-    return getBooleanInput('useLabelTrigger');
+    return getBooleanInput('useLabelTrigger', 'true');
 };
 const getUnresolvedLabel = (useLabelTrigger) => {
     let input = core.getInput('unresolvedLabel');
@@ -5941,7 +5939,7 @@ const getUnresolvedLabel = (useLabelTrigger) => {
     return input || 'unresolvedThreads';
 };
 const getUseCommentTrigger = () => {
-    return getBooleanInput('useCommentTrigger');
+    return getBooleanInput('useCommentTrigger', 'true');
 };
 const getResolvedCommentTrigger = (useCommentTrigger) => {
     let input = core.getInput('resolvedCommentTrigger');
