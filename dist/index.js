@@ -6174,16 +6174,19 @@ const deleteSynchronisationCommentTrigger = (context, octokit) => __awaiter(void
 });
 const checkForUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number);
+    console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`);
     return unresolvedThreads;
 });
 const reportUnresolvedThreads = (context, octokit, numberOfUnresolved) => __awaiter(void 0, void 0, void 0, function* () {
     if (context.useLabelTrigger)
         yield label_1.addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
+    console.log("Failure - It seems there are some unresolved review threads!");
     yield status_1.setCheckStatusAsFailure(octokit, context, numberOfUnresolved);
 });
 const reportNoUnresolvedThreads = (context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     if (context.useLabelTrigger)
         yield label_1.removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel);
+    console.log("Success - No unresolved review threads");
     yield status_1.setCheckStatusAsSuccess(octokit, context);
 });
 const handleEvent = () => __awaiter(void 0, void 0, void 0, function* () {

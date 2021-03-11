@@ -22,19 +22,19 @@ const deleteSynchronisationCommentTrigger = async (context: CommentCreatedContex
 
 const checkForUnresolvedThreads = async (context: PullRequestContext, octokit: OctokitInstance): Promise<UnresolvedThreads> => {
     const unresolvedThreads = await scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number)
-    // console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`)
+    console.log(`Number of Unresolved Review Threads: ${unresolvedThreads.numberOfUnresolved}`)
     return unresolvedThreads
 }
 
 const reportUnresolvedThreads = async (context: PullRequestContext, octokit: OctokitInstance, numberOfUnresolved: number) => {
     if(context.useLabelTrigger) await addLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
-    // console.log("Failure - It seems there are some unresolved review threads!")
+    console.log("Failure - It seems there are some unresolved review threads!")
     await setCheckStatusAsFailure(octokit, context, numberOfUnresolved)
 }
 
 const reportNoUnresolvedThreads = async (context: PullRequestContext, octokit: OctokitInstance) => {
     if(context.useLabelTrigger) await removeLabel(octokit, context.repoOwner, context.repoName, context.pullRequest, context.unresolvedLabel)
-    // console.log("Success - No unresolved review threads")
+    console.log("Success - No unresolved review threads")
     await setCheckStatusAsSuccess(octokit, context)
 }
 
