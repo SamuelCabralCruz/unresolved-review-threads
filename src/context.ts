@@ -193,7 +193,7 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
       repoName,
       labelTriggeredEvent: false,
       commentTriggeredEvent: false,
-      shouldProcessEvent: triggerType === 'other',
+      shouldProcessEvent: false,
    }
 
    if (!commonContext.useLabelTrigger && !commonContext.useCommentTrigger) throw new Error("At least one type of trigger must be enabled")
@@ -220,7 +220,7 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
          ...commonContext,
          pullRequest,
          labelTriggeredEvent,
-         shouldProcessEvent: useLabelTrigger && labelTriggeredEvent,
+         shouldProcessEvent: (useLabelTrigger && labelTriggeredEvent) || triggerType === 'other',
       } as PullRequestContext
    }
 

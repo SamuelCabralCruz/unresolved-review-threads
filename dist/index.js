@@ -6053,7 +6053,7 @@ const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
         repoName,
         labelTriggeredEvent: false,
         commentTriggeredEvent: false,
-        shouldProcessEvent: triggerType === 'other',
+        shouldProcessEvent: false,
     };
     if (!commonContext.useLabelTrigger && !commonContext.useCommentTrigger)
         throw new Error("At least one type of trigger must be enabled");
@@ -6071,7 +6071,7 @@ const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
         const pullRequest = getPullRequest();
         const labelTriggeredEvent = isLabelTriggeredEvent(triggerType);
         context = Object.assign(Object.assign({}, commonContext), { pullRequest,
-            labelTriggeredEvent, shouldProcessEvent: useLabelTrigger && labelTriggeredEvent });
+            labelTriggeredEvent, shouldProcessEvent: (useLabelTrigger && labelTriggeredEvent) || triggerType === 'other' });
     }
     console.log('Context');
     console.log(JSON.stringify(context, null, 2));
