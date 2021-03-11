@@ -6025,7 +6025,7 @@ const isCommentTriggeredEvent = (triggerType, commentBody, resolvedCommentTrigge
     return false;
 };
 const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(JSON.stringify(github.context));
+    console.log(JSON.stringify(github.context, null, 2));
     const useLabelTrigger = getUseLabelTrigger();
     const unresolvedLabel = getUnresolvedLabel(useLabelTrigger);
     const useCommentTrigger = getUseCommentTrigger();
@@ -6073,6 +6073,8 @@ const getContext = (octokit) => __awaiter(void 0, void 0, void 0, function* () {
         context = Object.assign(Object.assign({}, commonContext), { pullRequest,
             labelTriggeredEvent, shouldProcessEvent: useLabelTrigger && labelTriggeredEvent });
     }
+    console.log('Context');
+    console.log(JSON.stringify(context, null, 2));
     return context;
 });
 exports.getContext = getContext;

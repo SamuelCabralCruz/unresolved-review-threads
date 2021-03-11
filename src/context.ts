@@ -163,7 +163,7 @@ const isCommentTriggeredEvent = (triggerType: TriggerType, commentBody: string, 
 }
 
 export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedActionContext> => {
-   console.log(JSON.stringify(github.context))
+   console.log(JSON.stringify(github.context, null, 2))
 
    const useLabelTrigger = getUseLabelTrigger();
    const unresolvedLabel = getUnresolvedLabel(useLabelTrigger);
@@ -228,6 +228,9 @@ export const getContext = async (octokit: OctokitInstance): Promise<UnresolvedAc
    // console.log(`Repository Owner: ${repoOwner}`)
    // console.log(`Repository Name: ${repoName}`)
    // console.log(`Pull Request Number: ${pullRequest.number}`)
+
+   console.log('Context')
+   console.log(JSON.stringify(context, null, 2))
 
    return context
 }
