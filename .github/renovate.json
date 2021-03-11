@@ -23,7 +23,7 @@
       "schedule": ["before 6am on Sunday"]
     },
     {
-      "packagePatterns": ["^typescript$", "^ts", "tsconfig-paths-webpack-plugin"],
+      "packagePatterns": ["^typescript$", "^ts", "@types/node"],
       "groupName": "Typescript",
       "schedule": ["before 6am on Sunday"]
     },
@@ -35,6 +35,11 @@
     {
       "packagePatterns": ["jest", "@types/jest", "ts-jest"],
       "groupName": "Test",
+      "schedule": ["before 6am on Sunday"]
+    },
+    {
+      "packagePatterns": ["@action", "@octokit"],
+      "groupName": "GitHub",
       "schedule": ["before 6am on Sunday"]
     }
   ],
