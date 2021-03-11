@@ -3,7 +3,7 @@ import {CommentCreatedContext, getContext, PullRequestContext} from "@/src/conte
 import {OctokitInstance} from "@/src/octokitInstance";
 import {deleteComment} from "@/src/comment";
 import {addLabel, removeLabel} from "@/src/label";
-import {setCheckStatusAsFailure, setCheckStatusAsSuccess} from "@/src/status";
+import {setCheckStatusAsFailure, setCheckStatusAsPending, setCheckStatusAsSuccess} from "@/src/status";
 import {LoggingService} from "@/src/loggingService";
 
 const deleteSynchronisationCommentTrigger = async (loggingService: LoggingService, context: CommentCreatedContext, octokit: OctokitInstance) => {
@@ -43,6 +43,7 @@ export const handleEvent = async (loggingService: LoggingService, octokit: Octok
         await loggingService.info('Event does not match process requirements', 'Terminating process')
         return
     }
+    await setCheckStatusAsPending(octokit, context as PullRequestContext)
     if(context.commentTriggeredEvent) await deleteSynchronisationCommentTrigger(loggingService, context as CommentCreatedContext, octokit)
     const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(loggingService, context as PullRequestContext, octokit)
     anyUnresolved ? await reportUnresolvedThreads(loggingService, context as PullRequestContext, octokit, numberOfUnresolved) : await reportNoUnresolvedThreads(loggingService, context as PullRequestContext, octokit)

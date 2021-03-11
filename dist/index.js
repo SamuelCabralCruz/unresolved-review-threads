@@ -6406,6 +6406,7 @@ const handleEvent = (loggingService, octokit) => __awaiter(void 0, void 0, void 
         yield loggingService.info('Event does not match process requirements', 'Terminating process');
         return;
     }
+    yield status_1.setCheckStatusAsPending(octokit, context);
     if (context.commentTriggeredEvent)
         yield deleteSynchronisationCommentTrigger(loggingService, context, octokit);
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(loggingService, context, octokit);
@@ -6537,7 +6538,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = void 0;
+exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = exports.setCheckStatusAsPending = void 0;
+const setCheckStatusAsPending = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield octokit.repos.createCommitStatus({
+        owner: context.repoOwner,
+        repo: context.repoName,
+        sha: context.pullRequest.headRef,
+        state: "pending",
+        context: "Unresolved Review Threads",
+        description: "verification in progress",
+        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
+    });
+});
+exports.setCheckStatusAsPending = setCheckStatusAsPending;
 const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     return yield octokit.repos.createCommitStatus({
         owner: context.repoOwner,

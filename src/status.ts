@@ -1,6 +1,16 @@
 import {OctokitInstance} from "@/src/octokitInstance";
 import {PullRequestContext} from "@/src/context";
 
+export const setCheckStatusAsPending = async (octokit: OctokitInstance, context: PullRequestContext) => await octokit.repos.createCommitStatus({
+    owner: context.repoOwner,
+    repo: context.repoName,
+    sha: context.pullRequest.headRef,
+    state: "pending",
+    context: "Unresolved Review Threads",
+    description: "verification in progress",
+    target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
+})
+
 export const setCheckStatusAsSuccess = async (octokit: OctokitInstance, context: PullRequestContext) => await octokit.repos.createCommitStatus({
     owner: context.repoOwner,
     repo: context.repoName,
