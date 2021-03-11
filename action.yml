@@ -9,10 +9,10 @@ inputs:
     description: "Specify the name of the label to mark a pull request having unresolved review threads. (default: 'unresolvedThreads')"
     required: false
   useCommentTrigger:
-    description: "Flag indicating if comment should be used to manually trigger the action. (default: true)"
+    description: "Flag indicating if comment should be used to manually trigger the action. (default: false)"
     required: false
   resolvedCommentTrigger:
-    description: "Specify the content of the comment to retrigger the check when all review threads are resolved. (default: 'ALL_RESOLVED')"
+    description: "Specify the content of the comment to manually trigger the check when all review threads are resolved. (default: 'LGTM')"
     required: false
   deleteResolvedCommentTrigger:
     description: "Specify the name of the label to retrigger workflow check once all review threads are resolved. (default: true)"
