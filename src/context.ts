@@ -57,7 +57,7 @@ const getUseLabelTrigger = (): boolean => {
 
 const getUnresolvedLabel = (useLabelTrigger: boolean) : string => {
    let input = core.getInput('unresolvedLabel');
-   if(!useLabelTrigger && input != null) throw new Error("Can't define a unresolved label if use of label trigger is disabled")
+   if(!useLabelTrigger && input !== '') throw new Error("Can't define a unresolved label if use of label trigger is disabled")
    return input || 'unresolvedThreads'
 }
 
@@ -67,13 +67,13 @@ const getUseCommentTrigger = (): boolean => {
 
 const getResolvedCommentTrigger = (useCommentTrigger: boolean) : string => {
    let input = core.getInput('resolvedCommentTrigger');
-   if(!useCommentTrigger && input != null) throw new Error("Can't define a resolved comment trigger if use of comment trigger is disabled")
+   if(!useCommentTrigger && input !== '') throw new Error("Can't define a resolved comment trigger if use of comment trigger is disabled")
    return input || 'ALL_RESOLVED'
 }
 
 const getDeleteResolvedCommentTrigger = (useCommentTrigger: boolean): boolean => {
    let input = core.getInput('resolvedCommentTrigger');
-   if(!useCommentTrigger && input != null) throw new Error("Can't activate deletion of resolved comment trigger if use of comment trigger is disabled")
+   if(!useCommentTrigger && input !== '') throw new Error("Can't activate deletion of resolved comment trigger if use of comment trigger is disabled")
    return input === 'true' || true
 }
 
