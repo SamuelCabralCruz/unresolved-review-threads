@@ -52,6 +52,7 @@ const getOctokitClient = () => {
 const handleError = (loggingService, error) => __awaiter(void 0, void 0, void 0, function* () {
     if (error instanceof baseError_1.BaseError) {
         yield loggingService.error(error);
+        core.setFailed(error.description);
     }
     else {
         core.error(JSON.stringify(error, null, 2));
@@ -5947,40 +5948,40 @@ const InvalidBooleanInputError_1 = __nccwpck_require__(3527);
 const InvalidEventTypeError_1 = __nccwpck_require__(4597);
 const NoAssociatedPullRequestError_1 = __nccwpck_require__(6864);
 const eventType_1 = __nccwpck_require__(3405);
-const DEFAULT_VALUE_USE_LABEL_TRIGGER = `true`;
-const DEFAULT_VALUE_UNRESOLVED_LABEL = `unresolvedThreads`;
-const DEFAULT_VALUE_USE_COMMENT_TRIGGER = `false`;
-const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = `LGTM`;
-const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = `true`;
+const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true';
+const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads';
+const DEFAULT_VALUE_USE_COMMENT_TRIGGER = 'false';
+const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = 'LGTM';
+const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = 'true';
 const getBooleanInput = (inputName, defaultValue) => {
     const inputValue = core.getInput(inputName) || defaultValue;
-    if (![`true`, `false`].includes(inputValue))
+    if (!['true', 'false'].includes(inputValue))
         throw new InvalidBooleanInputError_1.InvalidBooleanInputError(inputName, inputValue);
-    return inputValue === `true`;
+    return inputValue === 'true';
 };
 const getUseLabelTrigger = () => {
-    return getBooleanInput(`useLabelTrigger`, DEFAULT_VALUE_USE_LABEL_TRIGGER);
+    return getBooleanInput('useLabelTrigger', DEFAULT_VALUE_USE_LABEL_TRIGGER);
 };
 const getUnresolvedLabel = (useLabelTrigger) => {
-    const input = core.getInput(`unresolvedLabel`);
-    if (!useLabelTrigger && input !== ``)
+    const input = core.getInput('unresolvedLabel');
+    if (!useLabelTrigger && input !== '')
         throw new DefinedUnresolvedLabelWithDisabledTriggerError_1.DefinedUnresolvedLabelWithDisabledTriggerError();
     return input || DEFAULT_VALUE_UNRESOLVED_LABEL;
 };
 const getUseCommentTrigger = () => {
-    return getBooleanInput(`useCommentTrigger`, DEFAULT_VALUE_USE_COMMENT_TRIGGER);
+    return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER);
 };
 const getResolvedCommentTrigger = (useCommentTrigger) => {
-    const input = core.getInput(`resolvedCommentTrigger`);
-    if (!useCommentTrigger && input !== ``)
+    const input = core.getInput('resolvedCommentTrigger');
+    if (!useCommentTrigger && input !== '')
         throw new DefinedResolvedCommentWithDisabledTriggerError_1.DefinedResolvedCommentWithDisabledTriggerError();
     return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER;
 };
 const getDeleteResolvedCommentTrigger = (useCommentTrigger) => {
-    const input = core.getInput(`resolvedCommentTrigger`);
-    if (!useCommentTrigger && input !== ``)
+    const input = core.getInput('resolvedCommentTrigger');
+    if (!useCommentTrigger && input !== '')
         throw new DefinedDeleteResolvedCommentWithDisabledTriggerError_1.DefinedDeleteResolvedCommentWithDisabledTriggerError();
-    return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === `true`;
+    return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true';
 };
 const getEventType = () => {
     const eventName = github.context.eventName;
@@ -5993,12 +5994,12 @@ const getEventType = () => {
 const getTriggerType = (eventType) => {
     switch (eventType) {
         case eventType_1.EventType.ISSUE_COMMENT_CREATED:
-            return `comment`;
+            return 'comment';
         case eventType_1.EventType.PULL_REQUEST_LABELED:
         case eventType_1.EventType.PULL_REQUEST_UNLABELED:
-            return `label`;
+            return 'label';
         default:
-            return `other`;
+            return 'other';
     }
 };
 const getRunId = () => {
@@ -6036,8 +6037,8 @@ const getCommonContext = () => {
         jobName: getJobName(),
         repoOwner: getRepoOwner(),
         repoName: getRepoName(),
-        labelTriggeredEvent: getTriggerType(eventType) === `label`,
-        commentTriggeredEvent: getTriggerType(eventType) === `comment`,
+        labelTriggeredEvent: getTriggerType(eventType) === 'label',
+        commentTriggeredEvent: getTriggerType(eventType) === 'comment',
         shouldProcessEvent: false,
     };
     return Object.assign({ commonContext }, commonContext);
@@ -6075,7 +6076,7 @@ const getCommentId = () => {
 const getCommentBody = () => {
     return github.context.payload.comment.body;
 };
-const shouldProcessTriggeredEvent = (useLabelTrigger, triggerType) => (useLabelTrigger && triggerType === `label`) || triggerType === `other`;
+const shouldProcessTriggeredEvent = (useLabelTrigger, triggerType) => (useLabelTrigger && triggerType === 'label') || triggerType === 'other';
 const shouldProcessCommentTriggeredEvent = (useCommentTrigger, commentBody, resolvedCommentTrigger, pullRequest) => useCommentTrigger && commentBody === resolvedCommentTrigger && pullRequest != null;
 function getCommentCreatedContext(triggerType, commonContext, octokit, repoOwner, repoName, resolvedCommentTrigger, useCommentTrigger) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -6096,12 +6097,12 @@ const verifyAtLeastOneTriggerOptionEnabled = (useLabelTrigger, useCommentTrigger
         throw new AtLeastOneTriggerOptionEnabledError_1.AtLeastOneTriggerOptionEnabledError();
 };
 const getContext = (loggingService, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    yield loggingService.debug(JSON.stringify(github.context, null, 2));
+    yield loggingService.debug('GitHub Context', JSON.stringify(github.context, null, 2));
     const { commonContext, useLabelTrigger, useCommentTrigger, resolvedCommentTrigger, triggerType, repoOwner, repoName, } = getCommonContext();
-    const context = triggerType === `comment`
+    const context = triggerType === 'comment'
         ? yield getCommentCreatedContext(triggerType, commonContext, octokit, repoOwner, repoName, resolvedCommentTrigger, useCommentTrigger)
         : yield getPullRequestContext(triggerType, commonContext, useLabelTrigger);
-    yield loggingService.debug(`Context`, JSON.stringify(context, null, 2));
+    yield loggingService.debug('Action Context', JSON.stringify(context, null, 2));
     yield verifyAtLeastOneTriggerOptionEnabled(commonContext.useLabelTrigger, commonContext.useCommentTrigger);
     return context;
 });
@@ -6120,7 +6121,7 @@ exports.AtLeastOneTriggerOptionEnabledError = void 0;
 const baseError_1 = __nccwpck_require__(1356);
 class AtLeastOneTriggerOptionEnabledError extends baseError_1.BaseError {
     constructor(cause) {
-        super(`AT_LEAST_ONE_TRIGGER_OPTION_ENABLED`, `There should be at least one trigger option enabled (label or comment).`, cause);
+        super('AT_LEAST_ONE_TRIGGER_OPTION_ENABLED', 'There should be at least one trigger option enabled (label or comment).', cause);
     }
 }
 exports.AtLeastOneTriggerOptionEnabledError = AtLeastOneTriggerOptionEnabledError;
@@ -6138,7 +6139,7 @@ exports.DefinedDeleteResolvedCommentWithDisabledTriggerError = void 0;
 const baseError_1 = __nccwpck_require__(1356);
 class DefinedDeleteResolvedCommentWithDisabledTriggerError extends baseError_1.BaseError {
     constructor(cause) {
-        super(`DEFINED_DELETE_RESOLVED_COMMENT_WITH_DISABLED_TRIGGER`, `Can't activate deletion of resolved comment trigger if use of comment trigger is disabled.`, cause);
+        super('DEFINED_DELETE_RESOLVED_COMMENT_WITH_DISABLED_TRIGGER', "Can't activate deletion of resolved comment trigger if use of comment trigger is disabled.", cause);
     }
 }
 exports.DefinedDeleteResolvedCommentWithDisabledTriggerError = DefinedDeleteResolvedCommentWithDisabledTriggerError;
@@ -6156,7 +6157,7 @@ exports.DefinedResolvedCommentWithDisabledTriggerError = void 0;
 const baseError_1 = __nccwpck_require__(1356);
 class DefinedResolvedCommentWithDisabledTriggerError extends baseError_1.BaseError {
     constructor(cause) {
-        super(`DEFINED_RESOLVED_COMMENT_WITH_DISABLED_TRIGGER`, `Can't define a resolved comment trigger if use of comment trigger is disabled.`, cause);
+        super('DEFINED_RESOLVED_COMMENT_WITH_DISABLED_TRIGGER', "Can't define a resolved comment trigger if use of comment trigger is disabled.", cause);
     }
 }
 exports.DefinedResolvedCommentWithDisabledTriggerError = DefinedResolvedCommentWithDisabledTriggerError;
@@ -6174,7 +6175,7 @@ exports.DefinedUnresolvedLabelWithDisabledTriggerError = void 0;
 const baseError_1 = __nccwpck_require__(1356);
 class DefinedUnresolvedLabelWithDisabledTriggerError extends baseError_1.BaseError {
     constructor(cause) {
-        super(`DEFINED_UNRESOLVED_LABEL_WITH_DISABLED_TRIGGER`, `Can't define a unresolved label if use of label trigger is disabled.`, cause);
+        super('DEFINED_UNRESOLVED_LABEL_WITH_DISABLED_TRIGGER', "Can't define a unresolved label if use of label trigger is disabled.", cause);
     }
 }
 exports.DefinedUnresolvedLabelWithDisabledTriggerError = DefinedUnresolvedLabelWithDisabledTriggerError;
@@ -6192,7 +6193,7 @@ exports.InvalidBooleanInputError = void 0;
 const baseError_1 = __nccwpck_require__(1356);
 class InvalidBooleanInputError extends baseError_1.BaseError {
     constructor(inputName, inputValue, cause) {
-        super(`INVALID_BOOLEAN_INPUT`, `${inputName} should be 'true' or 'false', received: ${inputValue}`, cause);
+        super('INVALID_BOOLEAN_INPUT', `${inputName} should be 'true' or 'false', received: ${inputValue}`, cause);
     }
 }
 exports.InvalidBooleanInputError = InvalidBooleanInputError;
@@ -6267,6 +6268,9 @@ class BaseError extends throwable_1.Throwable {
         super(cause);
         this.error = error;
         this.description = description;
+    }
+    get message() {
+        return `${this.error} - ${this.description}`;
     }
 }
 exports.BaseError = BaseError;
@@ -6492,7 +6496,7 @@ const getLoggingLevel = () => {
 class AbstractLoggingService {
     static flattenEntry(log) {
         const flatten = (arr) => arr.reduce((flat, next) => flat.concat(next), []);
-        return flatten(log.map((x) => x.split('\n')));
+        return flatten(log.map((x) => x.split('\n'))).filter((x) => x !== '');
     }
     info(...log) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -6507,7 +6511,7 @@ class AbstractLoggingService {
     }
     error(error) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.decoratedError(...AbstractLoggingService.flattenEntry([`${error.name} - ${error.message}`, error.stack]));
+            yield this.decoratedError(...AbstractLoggingService.flattenEntry([error.message, error.stack]));
         });
     }
 }

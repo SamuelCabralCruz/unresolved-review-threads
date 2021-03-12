@@ -9,4 +9,8 @@ export abstract class BaseError extends Throwable {
     this.error = error
     this.description = description
   }
+
+  get message(): string {
+    return `${this.error} - ${this.description}`
+  }
 }
