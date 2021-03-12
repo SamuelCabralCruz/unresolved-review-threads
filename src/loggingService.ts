@@ -24,7 +24,7 @@ abstract class AbstractLoggingService implements LoggingService {
   private static flattenEntry(log: string[]): string[] {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const flatten = (arr: Array<any>) => arr.reduce((flat, next) => flat.concat(next), [])
-    return flatten(log.map((x) => x.split('\n')))
+    return flatten(log.map((x) => x.split('\n'))).filter((x: string) => x !== '')
   }
 
   async info(...log: string[]): Promise<void> {
@@ -37,9 +37,7 @@ abstract class AbstractLoggingService implements LoggingService {
   }
 
   async error(error: BaseError): Promise<void> {
-    await this.decoratedError(
-      ...AbstractLoggingService.flattenEntry([`${error.name} - ${error.message}`, error.stack]),
-    )
+    await this.decoratedError(...AbstractLoggingService.flattenEntry([error.message, error.stack]))
   }
 }
 

@@ -36,8 +36,22 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 
 ## Inputs
 
-TODO: add inputs description and show different versions of the file
-
+- `useLabelTrigger`: Flag indicating if label should be use to manually trigger the action.
+  - __required__: false
+  - __default value__: true
+- `unresolvedLabel`: Specify the name of the label to mark a pull request having unresolved review threads.
+  - __required__: false
+  - __default value__: unresolvedThreads
+- `useCommentTrigger`: Flag indicating if comment should be used to manually trigger the action. (default: false)
+  - __required__: false
+  - __default value__: false
+- `resolvedCommentTrigger`: Specify the content of the comment to manually trigger the check when all review threads are resolved. (default: 'LGTM')
+  - __required__: false
+  - __default value__: LGTM
+- `deleteResolvedCommentTrigger`: Flag indicating if comment used to manually trigger the action should be deleted.
+  - __required__: false
+  - __default value__: true
+  
 ## Workflow
 
 - This action flow is currently a lot more complicated than it would otherwise be if GitHub Actions could be triggered on

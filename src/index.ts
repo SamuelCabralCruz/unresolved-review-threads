@@ -18,6 +18,7 @@ const getOctokitClient = (): OctokitInstance => {
 const handleError = async (loggingService: LoggingService, error: Error) => {
   if (error instanceof BaseError) {
     await loggingService.error(error)
+    core.setFailed(error.description)
   } else {
     core.error(JSON.stringify(error, null, 2))
     core.setFailed('Unexpected Error')

@@ -16,11 +16,11 @@ import { OctokitInstance } from '@/src/octokitInstance'
 import { PullRequest } from '@/src/pullRequest'
 import { TriggerType } from '@/src/triggerType'
 
-const DEFAULT_VALUE_USE_LABEL_TRIGGER = `true`
-const DEFAULT_VALUE_UNRESOLVED_LABEL = `unresolvedThreads`
-const DEFAULT_VALUE_USE_COMMENT_TRIGGER = `false`
-const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = `LGTM`
-const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = `true`
+const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true'
+const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads'
+const DEFAULT_VALUE_USE_COMMENT_TRIGGER = 'false'
+const DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER = 'LGTM'
+const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = 'true'
 
 type GitHubContextPullRequest = RestEndpointMethodTypes['pulls']['get']['response']['data']
 
@@ -59,38 +59,38 @@ export type PullRequestContext = CommonContext &
 
 export type UnresolvedActionContext = CommentCreatedContext | PullRequestContext
 
-const getBooleanInput = (inputName: string, defaultValue: `true` | `false`): boolean => {
+const getBooleanInput = (inputName: string, defaultValue: 'true' | 'false'): boolean => {
   const inputValue = core.getInput(inputName) || defaultValue
-  if (![`true`, `false`].includes(inputValue))
+  if (!['true', 'false'].includes(inputValue))
     throw new InvalidBooleanInputError(inputName, inputValue)
-  return inputValue === `true`
+  return inputValue === 'true'
 }
 
 const getUseLabelTrigger = (): boolean => {
-  return getBooleanInput(`useLabelTrigger`, DEFAULT_VALUE_USE_LABEL_TRIGGER)
+  return getBooleanInput('useLabelTrigger', DEFAULT_VALUE_USE_LABEL_TRIGGER)
 }
 
 const getUnresolvedLabel = (useLabelTrigger: boolean): string => {
-  const input = core.getInput(`unresolvedLabel`)
-  if (!useLabelTrigger && input !== ``) throw new DefinedUnresolvedLabelWithDisabledTriggerError()
+  const input = core.getInput('unresolvedLabel')
+  if (!useLabelTrigger && input !== '') throw new DefinedUnresolvedLabelWithDisabledTriggerError()
   return input || DEFAULT_VALUE_UNRESOLVED_LABEL
 }
 
 const getUseCommentTrigger = (): boolean => {
-  return getBooleanInput(`useCommentTrigger`, DEFAULT_VALUE_USE_COMMENT_TRIGGER)
+  return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER)
 }
 
 const getResolvedCommentTrigger = (useCommentTrigger: boolean): string => {
-  const input = core.getInput(`resolvedCommentTrigger`)
-  if (!useCommentTrigger && input !== ``) throw new DefinedResolvedCommentWithDisabledTriggerError()
+  const input = core.getInput('resolvedCommentTrigger')
+  if (!useCommentTrigger && input !== '') throw new DefinedResolvedCommentWithDisabledTriggerError()
   return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER
 }
 
 const getDeleteResolvedCommentTrigger = (useCommentTrigger: boolean): boolean => {
-  const input = core.getInput(`resolvedCommentTrigger`)
-  if (!useCommentTrigger && input !== ``)
+  const input = core.getInput('resolvedCommentTrigger')
+  if (!useCommentTrigger && input !== '')
     throw new DefinedDeleteResolvedCommentWithDisabledTriggerError()
-  return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === `true`
+  return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true'
 }
 
 const getEventType = (): EventType => {
@@ -104,12 +104,12 @@ const getEventType = (): EventType => {
 const getTriggerType = (eventType: EventType): TriggerType => {
   switch (eventType) {
     case EventType.ISSUE_COMMENT_CREATED:
-      return `comment`
+      return 'comment'
     case EventType.PULL_REQUEST_LABELED:
     case EventType.PULL_REQUEST_UNLABELED:
-      return `label`
+      return 'label'
     default:
-      return `other`
+      return 'other'
   }
 }
 
@@ -153,8 +153,8 @@ const getCommonContext = () => {
     jobName: getJobName(),
     repoOwner: getRepoOwner(),
     repoName: getRepoName(),
-    labelTriggeredEvent: getTriggerType(eventType) === `label`,
-    commentTriggeredEvent: getTriggerType(eventType) === `comment`,
+    labelTriggeredEvent: getTriggerType(eventType) === 'label',
+    commentTriggeredEvent: getTriggerType(eventType) === 'comment',
     shouldProcessEvent: false,
   }
   return { commonContext, ...commonContext }
@@ -200,7 +200,7 @@ const getCommentBody = (): string => {
 }
 
 const shouldProcessTriggeredEvent = (useLabelTrigger: boolean, triggerType: TriggerType): boolean =>
-  (useLabelTrigger && triggerType === `label`) || triggerType === `other`
+  (useLabelTrigger && triggerType === 'label') || triggerType === 'other'
 
 const shouldProcessCommentTriggeredEvent = (
   useCommentTrigger: boolean,
@@ -210,7 +210,7 @@ const shouldProcessCommentTriggeredEvent = (
 ): boolean => useCommentTrigger && commentBody === resolvedCommentTrigger && pullRequest != null
 
 async function getCommentCreatedContext(
-  triggerType: `comment`,
+  triggerType: 'comment',
   commonContext: CommonContext,
   octokit: OctokitInstance,
   repoOwner: string,
@@ -259,7 +259,7 @@ export const getContext = async (
   loggingService: LoggingService,
   octokit: OctokitInstance,
 ): Promise<UnresolvedActionContext> => {
-  await loggingService.debug(JSON.stringify(github.context, null, 2))
+  await loggingService.debug('GitHub Context', JSON.stringify(github.context, null, 2))
   const {
     commonContext,
     useLabelTrigger,
@@ -270,7 +270,7 @@ export const getContext = async (
     repoName,
   } = getCommonContext()
   const context: UnresolvedActionContext =
-    triggerType === `comment`
+    triggerType === 'comment'
       ? await getCommentCreatedContext(
           triggerType,
           commonContext,
@@ -281,7 +281,7 @@ export const getContext = async (
           useCommentTrigger,
         )
       : await getPullRequestContext(triggerType, commonContext, useLabelTrigger)
-  await loggingService.debug(`Context`, JSON.stringify(context, null, 2))
+  await loggingService.debug('Action Context', JSON.stringify(context, null, 2))
   await verifyAtLeastOneTriggerOptionEnabled(
     commonContext.useLabelTrigger,
     commonContext.useCommentTrigger,
