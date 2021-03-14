@@ -23,6 +23,6 @@ module.exports = {
   // coverage
   collectCoverage: true,
   collectCoverageFrom: ['!node_modules/*', '!dist/*', '!lib/*', 'src/**/*.{js,ts}'],
-  coverageReporters: ['json'],
+  coverageReporters: ['text', 'json'],
   coverageThreshold: undefined,
 }

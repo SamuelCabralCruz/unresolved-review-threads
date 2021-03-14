@@ -1,33 +1,39 @@
 import { PullRequestContext } from '@/src/context'
-import { OctokitInstance } from '@/src/octokitInstance'
+import { OctokitClient } from '@/src/octokitClient'
 
-export const setCheckStatusAsSuccess = async (
-  octokit: OctokitInstance,
+const setCheckStatus = async (
+  octokit: OctokitClient,
   context: PullRequestContext,
-): Promise<void> => {
+  state: 'success' | 'failure',
+  description: string,
+) => {
   await octokit.repos.createCommitStatus({
     owner: context.repoOwner,
     repo: context.repoName,
     sha: context.pullRequest.headRef,
-    state: 'success',
+    state,
     context: 'Unresolved Review Threads',
-    description: 'no unresolved threads found',
+    description,
     target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
   })
 }
 
+export const setCheckStatusAsSuccess = async (
+  octokit: OctokitClient,
+  context: PullRequestContext,
+): Promise<void> => {
+  await setCheckStatus(octokit, context, 'success', 'no unresolved thread found')
+}
+
 export const setCheckStatusAsFailure = async (
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   context: PullRequestContext,
   numberOfUnresolvedThreads: number,
 ): Promise<void> => {
-  await octokit.repos.createCommitStatus({
-    owner: context.repoOwner,
-    repo: context.repoName,
-    sha: context.pullRequest.headRef,
-    state: 'failure',
-    context: 'Unresolved Review Threads',
-    description: `${numberOfUnresolvedThreads} unresolved threads found`,
-    target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
-  })
+  await setCheckStatus(
+    octokit,
+    context,
+    'failure',
+    `${numberOfUnresolvedThreads} unresolved threads found`,
+  )
 }

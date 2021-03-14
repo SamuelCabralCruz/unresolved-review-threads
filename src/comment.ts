@@ -1,10 +1,10 @@
-import { OctokitInstance } from '@/src/octokitInstance'
+import { OctokitClient } from '@/src/octokitClient'
 
 export const deleteComment = async (
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
   commentId: number,
 ): Promise<void> => {
-  octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId })
+  await octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId })
 }

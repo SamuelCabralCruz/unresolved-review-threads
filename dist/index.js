@@ -7,25 +7,6 @@ require('./sourcemap-register.js');module.exports =
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,40 +17,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(9221));
-const github_1 = __nccwpck_require__(3737);
-const baseError_1 = __nccwpck_require__(1356);
-const UndefinedGitHubTokenError_1 = __nccwpck_require__(2584);
+exports.main = void 0;
 const handler_1 = __nccwpck_require__(9697);
 const loggingService_1 = __nccwpck_require__(4723);
-const getOctokitClient = () => {
-    const token = process.env.GITHUB_TOKEN;
-    if (token == null) {
-        throw new UndefinedGitHubTokenError_1.UndefinedGitHubTokenError();
-    }
-    return github_1.getOctokit(token);
-};
-const handleError = (loggingService, error) => __awaiter(void 0, void 0, void 0, function* () {
-    if (error instanceof baseError_1.BaseError) {
-        yield loggingService.error(error);
-        core.setFailed(error.description);
-    }
-    else {
-        core.error(JSON.stringify(error, null, 2));
-        core.setFailed('Unexpected Error');
-    }
-});
+const octokitClient_1 = __nccwpck_require__(6447);
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
     const loggingService = new loggingService_1.ConsoleLoggingService();
-    const octokit = getOctokitClient();
+    const octokit = octokitClient_1.getOctokitClient();
     try {
         yield handler_1.handleEvent(loggingService, octokit);
     }
     catch (error) {
-        yield handleError(loggingService, error);
+        yield handler_1.handleError(loggingService, error);
     }
 });
-main();
+exports.main = main;
+exports.main();
 //# sourceMappingURL=index.js.map
 
 /***/ }),
@@ -5963,7 +5926,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteComment = void 0;
 const deleteComment = (octokit, repoOwner, repoName, commentId) => __awaiter(void 0, void 0, void 0, function* () {
-    octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId });
+    yield octokit.issues.deleteComment({ owner: repoOwner, repo: repoName, comment_id: commentId });
 });
 exports.deleteComment = deleteComment;
 
@@ -6007,14 +5970,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getContext = void 0;
 const core = __importStar(__nccwpck_require__(9221));
 const github = __importStar(__nccwpck_require__(3737));
-const AtLeastOneTriggerOptionEnabledError_1 = __nccwpck_require__(5575);
-const DefinedDeleteResolvedCommentWithDisabledTriggerError_1 = __nccwpck_require__(4656);
-const DefinedResolvedCommentWithDisabledTriggerError_1 = __nccwpck_require__(2941);
-const DefinedUnresolvedLabelWithDisabledTriggerError_1 = __nccwpck_require__(2193);
-const InvalidBooleanInputError_1 = __nccwpck_require__(3527);
-const InvalidEventTypeError_1 = __nccwpck_require__(4597);
-const NoAssociatedPullRequestError_1 = __nccwpck_require__(6864);
+const atLeastOneTriggerOptionEnabledError_1 = __nccwpck_require__(6932);
+const definedDeleteResolvedCommentWithDisabledTriggerError_1 = __nccwpck_require__(7349);
+const definedResolvedCommentWithDisabledTriggerError_1 = __nccwpck_require__(4979);
+const definedUnresolvedLabelWithDisabledTriggerError_1 = __nccwpck_require__(3198);
+const invalidBooleanInputError_1 = __nccwpck_require__(153);
+const noAssociatedPullRequestError_1 = __nccwpck_require__(2255);
 const eventType_1 = __nccwpck_require__(3405);
+const pullRequest_1 = __nccwpck_require__(3779);
 const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true';
 const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads';
 const DEFAULT_VALUE_USE_COMMENT_TRIGGER = 'false';
@@ -6023,7 +5986,7 @@ const DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER = 'true';
 const getBooleanInput = (inputName, defaultValue) => {
     const inputValue = core.getInput(inputName) || defaultValue;
     if (!['true', 'false'].includes(inputValue))
-        throw new InvalidBooleanInputError_1.InvalidBooleanInputError(inputName, inputValue);
+        throw new invalidBooleanInputError_1.InvalidBooleanInputError(inputName, inputValue);
     return inputValue === 'true';
 };
 const getUseLabelTrigger = () => {
@@ -6032,31 +5995,28 @@ const getUseLabelTrigger = () => {
 const getUnresolvedLabel = (useLabelTrigger) => {
     const input = core.getInput('unresolvedLabel');
     if (!useLabelTrigger && input !== '')
-        throw new DefinedUnresolvedLabelWithDisabledTriggerError_1.DefinedUnresolvedLabelWithDisabledTriggerError();
+        throw new definedUnresolvedLabelWithDisabledTriggerError_1.DefinedUnresolvedLabelWithDisabledTriggerError();
     return input || DEFAULT_VALUE_UNRESOLVED_LABEL;
 };
 const getUseCommentTrigger = () => {
     return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER);
 };
-const getResolvedCommentTrigger = (useCommentTrigger) => {
+const getResolvedCommentTrigger = (resolvedCommentTrigger) => {
     const input = core.getInput('resolvedCommentTrigger');
-    if (!useCommentTrigger && input !== '')
-        throw new DefinedResolvedCommentWithDisabledTriggerError_1.DefinedResolvedCommentWithDisabledTriggerError();
+    if (!resolvedCommentTrigger && input !== '')
+        throw new definedResolvedCommentWithDisabledTriggerError_1.DefinedResolvedCommentWithDisabledTriggerError();
     return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER;
 };
-const getDeleteResolvedCommentTrigger = (useCommentTrigger) => {
-    const input = core.getInput('resolvedCommentTrigger');
-    if (!useCommentTrigger && input !== '')
-        throw new DefinedDeleteResolvedCommentWithDisabledTriggerError_1.DefinedDeleteResolvedCommentWithDisabledTriggerError();
+const getDeleteResolvedCommentTrigger = (deleteResolvedCommentTrigger) => {
+    const input = core.getInput('deleteResolvedCommentTrigger');
+    if (!deleteResolvedCommentTrigger && input !== '')
+        throw new definedDeleteResolvedCommentWithDisabledTriggerError_1.DefinedDeleteResolvedCommentWithDisabledTriggerError();
     return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true';
 };
 const getEventType = () => {
     const eventName = github.context.eventName;
     const eventAction = github.context.payload.action;
-    const eventType = eventType_1.eventTypeFrom(eventName, eventAction);
-    if (eventType == null)
-        throw new InvalidEventTypeError_1.InvalidEventTypeError(eventName, eventAction);
-    return eventType;
+    return eventType_1.eventTypeFrom(eventName, eventAction);
 };
 const getTriggerType = (eventType) => {
     switch (eventType) {
@@ -6116,21 +6076,12 @@ const getCommentCreatedPullRequest = (octokit, repoOwner, repoName) => __awaiter
         return undefined;
     }
     const pullRequestNumber = github.context.payload.issue.number;
-    const pullRequest = yield octokit.pulls.get({
-        owner: repoOwner,
-        repo: repoName,
-        pull_number: pullRequestNumber,
-    });
-    return {
-        number: pullRequestNumber,
-        headRef: pullRequest.data.head.sha,
-        labels: pullRequest.data.labels,
-    };
+    return pullRequest_1.getPullRequest(octokit, repoOwner, repoName, pullRequestNumber);
 });
-const getPullRequest = () => {
+const getEventPullRequest = () => {
     const pullRequest = github.context.payload.pull_request;
     if (pullRequest == null)
-        throw new NoAssociatedPullRequestError_1.NoAssociatedPullRequestError();
+        throw new noAssociatedPullRequestError_1.NoAssociatedPullRequestError();
     return {
         number: pullRequest.number,
         headRef: pullRequest.head.sha,
@@ -6156,12 +6107,12 @@ function getCommentCreatedContext(triggerType, commonContext, octokit, repoOwner
     });
 }
 function getPullRequestContext(triggerType, commonContext, useLabelTrigger) {
-    const pullRequest = getPullRequest();
+    const pullRequest = getEventPullRequest();
     return Object.assign(Object.assign({}, commonContext), { pullRequest, shouldProcessEvent: shouldProcessTriggeredEvent(useLabelTrigger, triggerType) });
 }
 const verifyAtLeastOneTriggerOptionEnabled = (useLabelTrigger, useCommentTrigger) => {
     if (!useLabelTrigger && !useCommentTrigger)
-        throw new AtLeastOneTriggerOptionEnabledError_1.AtLeastOneTriggerOptionEnabledError();
+        throw new atLeastOneTriggerOptionEnabledError_1.AtLeastOneTriggerOptionEnabledError();
 };
 const getContext = (loggingService, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     yield loggingService.debug('GitHub Context', JSON.stringify(github.context, null, 2));
@@ -6178,7 +6129,7 @@ exports.getContext = getContext;
 
 /***/ }),
 
-/***/ 5575:
+/***/ 6932:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6196,7 +6147,27 @@ exports.AtLeastOneTriggerOptionEnabledError = AtLeastOneTriggerOptionEnabledErro
 
 /***/ }),
 
-/***/ 4656:
+/***/ 1356:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BaseError = void 0;
+const throwable_1 = __nccwpck_require__(6891);
+class BaseError extends throwable_1.Throwable {
+    constructor(error, description, cause) {
+        super(`${error} - ${description}`, cause);
+        this.error = error;
+        this.description = description;
+    }
+}
+exports.BaseError = BaseError;
+
+
+/***/ }),
+
+/***/ 7349:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6214,7 +6185,7 @@ exports.DefinedDeleteResolvedCommentWithDisabledTriggerError = DefinedDeleteReso
 
 /***/ }),
 
-/***/ 2941:
+/***/ 4979:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6232,7 +6203,7 @@ exports.DefinedResolvedCommentWithDisabledTriggerError = DefinedResolvedCommentW
 
 /***/ }),
 
-/***/ 2193:
+/***/ 3198:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6250,7 +6221,7 @@ exports.DefinedUnresolvedLabelWithDisabledTriggerError = DefinedUnresolvedLabelW
 
 /***/ }),
 
-/***/ 3527:
+/***/ 153:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6268,7 +6239,7 @@ exports.InvalidBooleanInputError = InvalidBooleanInputError;
 
 /***/ }),
 
-/***/ 4597:
+/***/ 9083:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6286,7 +6257,7 @@ exports.InvalidEventTypeError = InvalidEventTypeError;
 
 /***/ }),
 
-/***/ 6864:
+/***/ 2255:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6304,7 +6275,29 @@ exports.NoAssociatedPullRequestError = NoAssociatedPullRequestError;
 
 /***/ }),
 
-/***/ 2584:
+/***/ 6891:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Throwable = void 0;
+class Throwable extends Error {
+    constructor(message, cause) {
+        super(message);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
+        this.stack = cause ? combineStackTraces(this, cause) : '';
+    }
+}
+exports.Throwable = Throwable;
+const lineSeparator = '\n';
+const combineStackTraces = (newError, cause) => [newError.stack.split(lineSeparator).slice(0, 2).join(lineSeparator), cause.stack].join(lineSeparator);
+
+
+/***/ }),
+
+/***/ 6194:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -6322,58 +6315,14 @@ exports.UndefinedGitHubTokenError = UndefinedGitHubTokenError;
 
 /***/ }),
 
-/***/ 1356:
+/***/ 3405:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BaseError = void 0;
-const throwable_1 = __nccwpck_require__(6891);
-class BaseError extends throwable_1.Throwable {
-    constructor(error, description, cause) {
-        super(cause);
-        this.error = error;
-        this.description = description;
-    }
-    get message() {
-        return `${this.error} - ${this.description}`;
-    }
-}
-exports.BaseError = BaseError;
-
-
-/***/ }),
-
-/***/ 6891:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Throwable = void 0;
-class Throwable extends Error {
-    constructor(cause) {
-        super();
-        this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
-        this.stack = cause ? combineStackTraces(this, cause) : '';
-    }
-}
-exports.Throwable = Throwable;
-const lineSeparator = '\n';
-const combineStackTraces = (newError, cause) => [newError.stack.split(lineSeparator).slice(0, 2).join(lineSeparator), cause.stack].join(lineSeparator);
-
-
-/***/ }),
-
-/***/ 3405:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.eventTypeFrom = exports.EventType = void 0;
+const invalidEventTypeError_1 = __nccwpck_require__(9083);
 var EventType;
 (function (EventType) {
     EventType["PULL_REQUEST_OPENED"] = "pull_request_opened";
@@ -6398,14 +6347,14 @@ const eventTypeFrom = (eventName, eventAction) => {
                 case 'unlabeled':
                     return EventType.PULL_REQUEST_UNLABELED;
                 default:
-                    return undefined;
+                    throw new invalidEventTypeError_1.InvalidEventTypeError(eventName, eventAction);
             }
         case 'issue_comment':
             switch (eventAction) {
                 case 'created':
                     return EventType.ISSUE_COMMENT_CREATED;
                 default:
-                    return undefined;
+                    throw new invalidEventTypeError_1.InvalidEventTypeError(eventName, eventAction);
             }
         case 'pull_request_review_comment':
             switch (eventAction) {
@@ -6416,10 +6365,10 @@ const eventTypeFrom = (eventName, eventAction) => {
                 case 'deleted':
                     return EventType.PULL_REQUEST_REVIEW_COMMENT_DELETED;
                 default:
-                    return undefined;
+                    throw new invalidEventTypeError_1.InvalidEventTypeError(eventName, eventAction);
             }
         default:
-            return undefined;
+            throw new invalidEventTypeError_1.InvalidEventTypeError(eventName, eventAction);
     }
 };
 exports.eventTypeFrom = eventTypeFrom;
@@ -6432,6 +6381,25 @@ exports.eventTypeFrom = eventTypeFrom;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -6442,9 +6410,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.handleEvent = void 0;
+exports.handleError = exports.handleEvent = void 0;
+const core = __importStar(__nccwpck_require__(9221));
 const comment_1 = __nccwpck_require__(4073);
 const context_1 = __nccwpck_require__(8629);
+const baseError_1 = __nccwpck_require__(1356);
 const label_1 = __nccwpck_require__(637);
 const status_1 = __nccwpck_require__(2886);
 const unresolvedThread_1 = __nccwpck_require__(9796);
@@ -6455,7 +6425,7 @@ const deleteSynchronisationCommentTrigger = (loggingService, context, octokit) =
     }
 });
 const checkForUnresolvedThreads = (loggingService, context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(octokit, context.repoOwner, context.repoName, context.pullRequest.number);
+    const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(loggingService, octokit, context.repoOwner, context.repoName, context.pullRequest.number);
     yield loggingService.info(`Number of unresolved review threads found: ${unresolvedThreads.numberOfUnresolved}`);
     return unresolvedThreads;
 });
@@ -6489,6 +6459,17 @@ const handleEvent = (loggingService, octokit) => __awaiter(void 0, void 0, void 
         : yield reportNoUnresolvedThreads(loggingService, context, octokit);
 });
 exports.handleEvent = handleEvent;
+const handleError = (loggingService, error) => __awaiter(void 0, void 0, void 0, function* () {
+    if (error instanceof baseError_1.BaseError) {
+        yield loggingService.error(error);
+        core.setFailed(error.description);
+    }
+    else {
+        core.error(JSON.stringify(error.stack, null, 2));
+        core.setFailed('Unexpected Error');
+    }
+});
+exports.handleError = handleError;
 
 
 /***/ }),
@@ -6556,33 +6537,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ConsoleLoggingService = void 0;
 const loggingLevels = ['INFO', 'DEBUG'];
-const getLoggingLevel = () => {
-    const env = process.env.LOGGING_LEVEL;
-    return loggingLevels.includes(env) ? env : 'INFO';
-};
 class AbstractLoggingService {
+    constructor() {
+        this.info = (...log) => __awaiter(this, void 0, void 0, function* () {
+            yield this.decoratedInfo(...AbstractLoggingService.flattenEntry(log));
+        });
+        this.debug = (...log) => __awaiter(this, void 0, void 0, function* () {
+            if (AbstractLoggingService.getLoggingLevel() === 'DEBUG')
+                yield this.decoratedDebug(...AbstractLoggingService.flattenEntry(log));
+        });
+        this.error = (error) => __awaiter(this, void 0, void 0, function* () {
+            yield this.decoratedError(...AbstractLoggingService.flattenEntry([error.message, error.stack]));
+        });
+    }
+    static getLoggingLevel() {
+        const env = process.env.LOGGING_LEVEL;
+        return loggingLevels.includes(env) ? env : 'INFO';
+    }
     static flattenEntry(log) {
         const flatten = (arr) => arr.reduce((flat, next) => flat.concat(next), []);
         return flatten(log.map((x) => x.split('\n'))).filter((x) => x !== '');
     }
-    info(...log) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.decoratedInfo(...AbstractLoggingService.flattenEntry(log));
-        });
-    }
-    debug(...log) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (AbstractLoggingService.loggingLevel === 'DEBUG')
-                yield this.decoratedDebug(...AbstractLoggingService.flattenEntry(log));
-        });
-    }
-    error(error) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.decoratedError(...AbstractLoggingService.flattenEntry([error.message, error.stack]));
-        });
-    }
 }
-AbstractLoggingService.loggingLevel = getLoggingLevel();
 class ConsoleLoggingService extends AbstractLoggingService {
     static wrapConsoleEntry(produceConsoleEntry) {
         console.log('');
@@ -6609,6 +6585,60 @@ exports.ConsoleLoggingService = ConsoleLoggingService;
 
 /***/ }),
 
+/***/ 6447:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOctokitClient = void 0;
+const github_1 = __nccwpck_require__(3737);
+const undefinedGitHubTokenError_1 = __nccwpck_require__(6194);
+const getOctokitClient = () => {
+    const token = process.env.GITHUB_TOKEN;
+    if (token == null) {
+        throw new undefinedGitHubTokenError_1.UndefinedGitHubTokenError();
+    }
+    return github_1.getOctokit(token);
+};
+exports.getOctokitClient = getOctokitClient;
+
+
+/***/ }),
+
+/***/ 3779:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getPullRequest = void 0;
+const getPullRequest = (octokit, repoOwner, repoName, pullRequestNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    const pullRequest = yield octokit.pulls.get({
+        owner: repoOwner,
+        repo: repoName,
+        pull_number: pullRequestNumber,
+    });
+    return {
+        number: pullRequestNumber,
+        headRef: pullRequest.data.head.sha,
+        labels: pullRequest.data.labels,
+    };
+});
+exports.getPullRequest = getPullRequest;
+
+
+/***/ }),
+
 /***/ 2886:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -6625,28 +6655,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.setCheckStatusAsFailure = exports.setCheckStatusAsSuccess = void 0;
-const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+const setCheckStatus = (octokit, context, state, description) => __awaiter(void 0, void 0, void 0, function* () {
     yield octokit.repos.createCommitStatus({
         owner: context.repoOwner,
         repo: context.repoName,
         sha: context.pullRequest.headRef,
-        state: 'success',
+        state,
         context: 'Unresolved Review Threads',
-        description: 'no unresolved threads found',
+        description,
         target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
     });
 });
+const setCheckStatusAsSuccess = (octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    yield setCheckStatus(octokit, context, 'success', 'no unresolved thread found');
+});
 exports.setCheckStatusAsSuccess = setCheckStatusAsSuccess;
 const setCheckStatusAsFailure = (octokit, context, numberOfUnresolvedThreads) => __awaiter(void 0, void 0, void 0, function* () {
-    yield octokit.repos.createCommitStatus({
-        owner: context.repoOwner,
-        repo: context.repoName,
-        sha: context.pullRequest.headRef,
-        state: 'failure',
-        context: 'Unresolved Review Threads',
-        description: `${numberOfUnresolvedThreads} unresolved threads found`,
-        target_url: `https://github.com/${context.repoOwner}/${context.repoName}/actions/runs/${context.runId}`,
-    });
+    yield setCheckStatus(octokit, context, 'failure', `${numberOfUnresolvedThreads} unresolved threads found`);
 });
 exports.setCheckStatusAsFailure = setCheckStatusAsFailure;
 
@@ -6683,13 +6708,14 @@ const QUERY = `
                 }
             }
         }`;
-const scanPullRequestForUnresolvedReviewThreads = (octokit, repoOwner, repoName, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
+const scanPullRequestForUnresolvedReviewThreads = (loggingService, octokit, repoOwner, repoName, pullRequest) => __awaiter(void 0, void 0, void 0, function* () {
     const variables = {
         repoOwner,
         repoName,
         pullRequest,
     };
     const reviewThreads = yield octokit.graphql(QUERY, variables);
+    yield loggingService.debug('Review Threads Response', JSON.stringify(reviewThreads, null, 2));
     const unresolvedReviewThreads = reviewThreads.repository.pullRequest.reviewThreads.edges.filter((x) => !x.node.isResolved);
     return {
         anyUnresolved: !!unresolvedReviewThreads.length,

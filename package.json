@@ -1,6 +1,6 @@
 {
   "name": "unresolved-review-threads",
-  "version": "1.0.0",
+  "version": "0.0.7",
   "description": "GitHub Action to prevent the merge of pull request having unresolved review threads",
   "main": "lib/src/index.js",
   "scripts": {
@@ -9,6 +9,8 @@
     "lint": "eslint --ext .js,.ts --max-warnings=0 --color .",
     "lint:fix": "eslint --ext .js,.ts --fix --color .",
     "test": "jest",
+    "test:ci": "yarn test --coverage --ci --runInBand --verbose",
+    "test:watch": "yarn test --watchAll",
     "dist": "ncc build --source-map --license licenses.txt",
     "release": "npm run build && npm run dist"
   },
@@ -33,6 +35,8 @@
     "@octokit/rest": "18.3.5"
   },
   "devDependencies": {
+    "@octokit/types": "6.12.2",
+    "@types/faker": "5.1.7",
     "@types/jest": "26.0.20",
     "@types/node": "14.14.33",
     "@typescript-eslint/eslint-plugin": "4.17.0",
@@ -45,6 +49,7 @@
     "eslint-plugin-prettier": "3.3.1",
     "eslint-plugin-simple-import-sort": "7.0.0",
     "eslint-plugin-unused-imports": "1.1.0",
+    "faker": "5.4.0",
     "jest": "26.6.3",
     "prettier": "2.2.1",
     "ts-jest": "26.5.3",
