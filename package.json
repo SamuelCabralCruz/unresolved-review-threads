@@ -4,9 +4,10 @@
   "description": "GitHub Action to prevent the merge of pull request having unresolved review threads",
   "main": "lib/src/index.js",
   "scripts": {
+    "build": "tsc -p tsconfig.prod.json",
+    "license-check": "d2l-license-checker",
     "lint": "eslint --ext .js,.ts --max-warnings=0 --color .",
     "lint:fix": "eslint --ext .js,.ts --fix --color .",
-    "build": "tsc -p tsconfig.prod.json",
     "test": "jest",
     "dist": "ncc build --source-map --license licenses.txt",
     "release": "npm run build && npm run dist"
@@ -36,6 +37,7 @@
     "@types/node": "14.14.33",
     "@typescript-eslint/eslint-plugin": "4.17.0",
     "@typescript-eslint/parser": "4.17.0",
+    "d2l-license-checker": "3.2.0",
     "eslint": "7.21.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-import-resolver-typescript": "2.4.0",
