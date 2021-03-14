@@ -29,13 +29,18 @@ jobs:
         uses: actions/cache@v2
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
 
       - name: Install Dependencies
         if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm install
+        run: yarn install
+
+      - name: License Check
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: yarn license-check
+
+      - name: Lint
+        run: yarn lint
 
       - name: Test
-        run: npm run test
+        run: yarn test
