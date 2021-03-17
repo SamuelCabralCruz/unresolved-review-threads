@@ -1,4 +1,4 @@
-import { OctokitInstance } from '@/src/octokitInstance'
+import { OctokitClient } from '@/src/octokitClient'
 import { PullRequest } from '@/src/pullRequest'
 
 export const hasLabel = (pullRequest: PullRequest, labelName: string): boolean => {
@@ -6,7 +6,7 @@ export const hasLabel = (pullRequest: PullRequest, labelName: string): boolean =
 }
 
 export const addLabel = async (
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
   pullRequest: PullRequest,
@@ -23,7 +23,7 @@ export const addLabel = async (
 }
 
 export const removeLabel = async (
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
   pullRequest: PullRequest,

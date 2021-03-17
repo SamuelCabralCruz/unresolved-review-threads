@@ -3,17 +3,16 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { RestEndpointMethodTypes } from '@octokit/rest'
 
-import { AtLeastOneTriggerOptionEnabledError } from '@/src/error/AtLeastOneTriggerOptionEnabledError'
-import { DefinedDeleteResolvedCommentWithDisabledTriggerError } from '@/src/error/DefinedDeleteResolvedCommentWithDisabledTriggerError'
-import { DefinedResolvedCommentWithDisabledTriggerError } from '@/src/error/DefinedResolvedCommentWithDisabledTriggerError'
-import { DefinedUnresolvedLabelWithDisabledTriggerError } from '@/src/error/DefinedUnresolvedLabelWithDisabledTriggerError'
-import { InvalidBooleanInputError } from '@/src/error/InvalidBooleanInputError'
-import { InvalidEventTypeError } from '@/src/error/InvalidEventTypeError'
-import { NoAssociatedPullRequestError } from '@/src/error/NoAssociatedPullRequestError'
+import { AtLeastOneTriggerOptionEnabledError } from '@/src/error/atLeastOneTriggerOptionEnabledError'
+import { DefinedDeleteResolvedCommentWithDisabledTriggerError } from '@/src/error/definedDeleteResolvedCommentWithDisabledTriggerError'
+import { DefinedResolvedCommentWithDisabledTriggerError } from '@/src/error/definedResolvedCommentWithDisabledTriggerError'
+import { DefinedUnresolvedLabelWithDisabledTriggerError } from '@/src/error/definedUnresolvedLabelWithDisabledTriggerError'
+import { InvalidBooleanInputError } from '@/src/error/invalidBooleanInputError'
+import { NoAssociatedPullRequestError } from '@/src/error/noAssociatedPullRequestError'
 import { EventType, eventTypeFrom } from '@/src/eventType'
 import { LoggingService } from '@/src/loggingService'
-import { OctokitInstance } from '@/src/octokitInstance'
-import { PullRequest } from '@/src/pullRequest'
+import { OctokitClient } from '@/src/octokitClient'
+import { getPullRequest, PullRequest } from '@/src/pullRequest'
 import { TriggerType } from '@/src/triggerType'
 
 const DEFAULT_VALUE_USE_LABEL_TRIGGER = 'true'
@@ -80,15 +79,16 @@ const getUseCommentTrigger = (): boolean => {
   return getBooleanInput('useCommentTrigger', DEFAULT_VALUE_USE_COMMENT_TRIGGER)
 }
 
-const getResolvedCommentTrigger = (useCommentTrigger: boolean): string => {
+const getResolvedCommentTrigger = (resolvedCommentTrigger: boolean): string => {
   const input = core.getInput('resolvedCommentTrigger')
-  if (!useCommentTrigger && input !== '') throw new DefinedResolvedCommentWithDisabledTriggerError()
+  if (!resolvedCommentTrigger && input !== '')
+    throw new DefinedResolvedCommentWithDisabledTriggerError()
   return input || DEFAULT_VALUE_RESOLVED_COMMENT_TRIGGER
 }
 
-const getDeleteResolvedCommentTrigger = (useCommentTrigger: boolean): boolean => {
-  const input = core.getInput('resolvedCommentTrigger')
-  if (!useCommentTrigger && input !== '')
+const getDeleteResolvedCommentTrigger = (deleteResolvedCommentTrigger: boolean): boolean => {
+  const input = core.getInput('deleteResolvedCommentTrigger')
+  if (!deleteResolvedCommentTrigger && input !== '')
     throw new DefinedDeleteResolvedCommentWithDisabledTriggerError()
   return (input || DEFAULT_VALUE_DELETE_RESOLVED_COMMENT_TRIGGER) === 'true'
 }
@@ -96,9 +96,7 @@ const getDeleteResolvedCommentTrigger = (useCommentTrigger: boolean): boolean =>
 const getEventType = (): EventType => {
   const eventName = github.context.eventName
   const eventAction = github.context.payload.action!
-  const eventType = eventTypeFrom(eventName, eventAction)
-  if (eventType == null) throw new InvalidEventTypeError(eventName, eventAction)
-  return eventType
+  return eventTypeFrom(eventName, eventAction)
 }
 
 const getTriggerType = (eventType: EventType): TriggerType => {
@@ -161,7 +159,7 @@ const getCommonContext = () => {
 }
 
 const getCommentCreatedPullRequest = async (
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
 ): Promise<PullRequest | undefined> => {
@@ -169,19 +167,10 @@ const getCommentCreatedPullRequest = async (
     return undefined
   }
   const pullRequestNumber = github.context.payload.issue!.number
-  const pullRequest = await octokit.pulls.get({
-    owner: repoOwner,
-    repo: repoName,
-    pull_number: pullRequestNumber,
-  })
-  return {
-    number: pullRequestNumber,
-    headRef: pullRequest.data.head.sha,
-    labels: pullRequest.data.labels,
-  }
+  return getPullRequest(octokit, repoOwner, repoName, pullRequestNumber)
 }
 
-const getPullRequest = (): PullRequest => {
+const getEventPullRequest = (): PullRequest => {
   const pullRequest = github.context.payload.pull_request as GitHubContextPullRequest
   if (pullRequest == null) throw new NoAssociatedPullRequestError()
   return {
@@ -212,7 +201,7 @@ const shouldProcessCommentTriggeredEvent = (
 async function getCommentCreatedContext(
   triggerType: 'comment',
   commonContext: CommonContext,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
   resolvedCommentTrigger: string,
@@ -240,7 +229,7 @@ function getPullRequestContext(
   commonContext: CommonContext,
   useLabelTrigger: boolean,
 ) {
-  const pullRequest = getPullRequest()
+  const pullRequest = getEventPullRequest()
   return {
     ...commonContext,
     pullRequest,
@@ -257,7 +246,7 @@ const verifyAtLeastOneTriggerOptionEnabled = (
 
 export const getContext = async (
   loggingService: LoggingService,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
 ): Promise<UnresolvedActionContext> => {
   await loggingService.debug('GitHub Context', JSON.stringify(github.context, null, 2))
   const {

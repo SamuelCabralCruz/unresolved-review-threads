@@ -1,4 +1,5 @@
-import { OctokitInstance } from '@/src/octokitInstance'
+import { LoggingService } from '@/src/loggingService'
+import { OctokitClient } from '@/src/octokitClient'
 
 const QUERY = `
         query reviewThreads($repoOwner:String!,$repoName:String!,$pullRequest:Int!) {
@@ -37,7 +38,8 @@ export type UnresolvedThreads = {
 }
 
 export const scanPullRequestForUnresolvedReviewThreads = async (
-  octokit: OctokitInstance,
+  loggingService: LoggingService,
+  octokit: OctokitClient,
   repoOwner: string,
   repoName: string,
   pullRequest: number,
@@ -48,7 +50,7 @@ export const scanPullRequestForUnresolvedReviewThreads = async (
     pullRequest,
   }
   const reviewThreads: ReviewThreadsResponse = await octokit.graphql(QUERY, variables)
-  // console.log(JSON.stringify(reviewThreads))
+  await loggingService.debug('Review Threads Response', JSON.stringify(reviewThreads, null, 2))
   const unresolvedReviewThreads = reviewThreads.repository.pullRequest.reviewThreads.edges.filter(
     (x) => !x.node.isResolved,
   )

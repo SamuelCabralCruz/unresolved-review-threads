@@ -1,8 +1,8 @@
 export abstract class Throwable extends Error {
   public readonly stack: string
 
-  protected constructor(cause?: Error) {
-    super()
+  protected constructor(message: string, cause?: Error) {
+    super(message)
     this.name = this.constructor.name
     Error.captureStackTrace(this, this.constructor)
     this.stack = cause ? combineStackTraces(this, cause) : ''

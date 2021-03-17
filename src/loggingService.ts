@@ -3,11 +3,6 @@ import { BaseError } from '@/src/error/baseError'
 const loggingLevels = ['INFO', 'DEBUG'] as const
 export type LoggingLevel = typeof loggingLevels[number]
 
-const getLoggingLevel = (): LoggingLevel => {
-  const env = process.env.LOGGING_LEVEL as LoggingLevel
-  return loggingLevels.includes(env) ? (env as LoggingLevel) : 'INFO'
-}
-
 export type LoggingService = {
   info: (...log: string[]) => Promise<void>
   debug: (...log: string[]) => Promise<void>
@@ -15,11 +10,14 @@ export type LoggingService = {
 }
 
 abstract class AbstractLoggingService implements LoggingService {
-  private static readonly loggingLevel = getLoggingLevel()
-
   abstract decoratedInfo(...log: string[]): Promise<void>
   abstract decoratedDebug(...log: string[]): Promise<void>
   abstract decoratedError(...log: string[]): Promise<void>
+
+  private static getLoggingLevel(): LoggingLevel {
+    const env = process.env.LOGGING_LEVEL as LoggingLevel
+    return loggingLevels.includes(env) ? (env as LoggingLevel) : 'INFO'
+  }
 
   private static flattenEntry(log: string[]): string[] {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,16 +25,16 @@ abstract class AbstractLoggingService implements LoggingService {
     return flatten(log.map((x) => x.split('\n'))).filter((x: string) => x !== '')
   }
 
-  async info(...log: string[]): Promise<void> {
+  info = async (...log: string[]): Promise<void> => {
     await this.decoratedInfo(...AbstractLoggingService.flattenEntry(log))
   }
 
-  async debug(...log: string[]): Promise<void> {
-    if (AbstractLoggingService.loggingLevel === 'DEBUG')
+  debug = async (...log: string[]): Promise<void> => {
+    if (AbstractLoggingService.getLoggingLevel() === 'DEBUG')
       await this.decoratedDebug(...AbstractLoggingService.flattenEntry(log))
   }
 
-  async error(error: BaseError): Promise<void> {
+  error = async (error: BaseError): Promise<void> => {
     await this.decoratedError(...AbstractLoggingService.flattenEntry([error.message, error.stack]))
   }
 }

@@ -5,12 +5,8 @@ export abstract class BaseError extends Throwable {
   public readonly description: string
 
   protected constructor(error: string, description: string, cause?: Error) {
-    super(cause)
+    super(`${error} - ${description}`, cause)
     this.error = error
     this.description = description
-  }
-
-  get message(): string {
-    return `${this.error} - ${this.description}`
   }
 }

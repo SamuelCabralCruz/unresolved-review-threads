@@ -1,8 +1,11 @@
+import * as core from '@actions/core'
+
 import { deleteComment } from '@/src/comment'
 import { CommentCreatedContext, getContext, PullRequestContext } from '@/src/context'
+import { BaseError } from '@/src/error/baseError'
 import { addLabel, removeLabel } from '@/src/label'
 import { LoggingService } from '@/src/loggingService'
-import { OctokitInstance } from '@/src/octokitInstance'
+import { OctokitClient } from '@/src/octokitClient'
 import { setCheckStatusAsFailure, setCheckStatusAsSuccess } from '@/src/status'
 import {
   scanPullRequestForUnresolvedReviewThreads,
@@ -12,7 +15,7 @@ import {
 const deleteSynchronisationCommentTrigger = async (
   loggingService: LoggingService,
   context: CommentCreatedContext,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
 ) => {
   if (context.deleteResolvedCommentTrigger != null) {
     await deleteComment(octokit, context.repoOwner, context.repoName, context.commentId)
@@ -25,9 +28,10 @@ const deleteSynchronisationCommentTrigger = async (
 const checkForUnresolvedThreads = async (
   loggingService: LoggingService,
   context: PullRequestContext,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
 ): Promise<UnresolvedThreads> => {
   const unresolvedThreads = await scanPullRequestForUnresolvedReviewThreads(
+    loggingService,
     octokit,
     context.repoOwner,
     context.repoName,
@@ -42,7 +46,7 @@ const checkForUnresolvedThreads = async (
 const reportUnresolvedThreads = async (
   loggingService: LoggingService,
   context: PullRequestContext,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
   numberOfUnresolved: number,
 ) => {
   if (context.useLabelTrigger) {
@@ -62,7 +66,7 @@ const reportUnresolvedThreads = async (
 const reportNoUnresolvedThreads = async (
   loggingService: LoggingService,
   context: PullRequestContext,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
 ) => {
   if (context.useLabelTrigger) {
     await removeLabel(
@@ -80,7 +84,7 @@ const reportNoUnresolvedThreads = async (
 
 export const handleEvent = async (
   loggingService: LoggingService,
-  octokit: OctokitInstance,
+  octokit: OctokitClient,
 ): Promise<void> => {
   const context = await getContext(loggingService, octokit)
   if (!context.shouldProcessEvent) {
@@ -106,4 +110,14 @@ export const handleEvent = async (
         numberOfUnresolved,
       )
     : await reportNoUnresolvedThreads(loggingService, context as PullRequestContext, octokit)
+}
+
+export const handleError = async (loggingService: LoggingService, error: Error): Promise<void> => {
+  if (error instanceof BaseError) {
+    await loggingService.error(error)
+    core.setFailed(error.description)
+  } else {
+    core.error(JSON.stringify(error.stack, null, 2))
+    core.setFailed('Unexpected Error')
+  }
 }
