@@ -2,17 +2,23 @@ name: 'CD - Pipeline'
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - main
 
 jobs:
-  deploy:
-    name: Create Release
+  release:
+    name: Release New Patched Version
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Patch Version
+        run: |
+          yarn version --patch
+          git add -A
+          git push
 
       - name: Release
         uses: softprops/action-gh-release@v0.1.5
