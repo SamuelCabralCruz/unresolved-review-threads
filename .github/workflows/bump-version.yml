@@ -1,0 +1,33 @@
+name: 'Path Version on Merge'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  patch-version-on-merge:
+    name: Patch Version on Merge
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Temporarily Disable "include administrators" Branch Protection
+        uses: benjefferies/branch-protection-bot@1.0.5
+        if: always()
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Patch Version
+        run: |
+          yarn version --patch
+          git add -A
+          git push
+
+      - name: Enable "include administrators" Branch Protection
+        uses: benjefferies/branch-protection-bot@1.0.5
+        if: always()
+        with:
+          access-token: ${{ secrets.ACCESS_TOKEN }}
