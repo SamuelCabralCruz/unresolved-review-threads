@@ -40,10 +40,12 @@ If you use [probot/settings](https://github.com/probot/settings) to configure yo
 
   ```yaml
   labels:
-    ...
     - name: unresolvedThreads
       color: '#333333'
       description: Add or remove this label to manually trigger UnresolvedReviewThreads check.
+    - name: ignoreUnresolved
+      color: '#333333'
+      description: Indicate to skip the unresolved review threads check on a specific pull request.
 
   branches:
     - name: main

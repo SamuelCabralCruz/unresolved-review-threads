@@ -3,8 +3,13 @@ description: "Prevent merge of pull request having unresolved review threads"
 author: "SamuelCabralCruz"
 inputs:
   unresolvedLabel:
-    description: "Specify the name of the label to mark a pull request having unresolved review threads. (default: 'unresolvedThreads')"
+    description: "Specify the name of the label to mark a pull request having unresolved review threads."
     required: false
+    default: unresolvedThreads
+  bypassLabel:
+    description: "Specify the name of the label to ignore the unresolved threads check on a given pull request."
+    required: false
+    default: ignoreUnresolved
 runs:
   using: "node12"
   main: "dist/index.js"

@@ -1,9 +1,8 @@
 import { OctokitClient } from '@/src/octokitClient'
 import { PullRequest } from '@/src/pullRequest'
 
-export const hasLabel = (pullRequest: PullRequest, labelName: string): boolean => {
-  return !!pullRequest.labels.filter((x) => x.name === labelName).length
-}
+export const hasLabel = (pullRequest: PullRequest, labelName: string): boolean =>
+  pullRequest.labels.map((x) => x.name).includes(labelName)
 
 export const addLabel = async (
   octokit: OctokitClient,
