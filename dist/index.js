@@ -6209,8 +6209,7 @@ const status_1 = __nccwpck_require__(2886);
 const unresolvedThread_1 = __nccwpck_require__(9796);
 const bypassCheck = (loggingService, octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     yield loggingService.info('Bypass label found on the pull request', 'Unresolved Threads Check Skipped');
-    yield status_1.setCheckStatusAsSuccess(octokit, context);
-    yield loggingService.info('Success status check added to pull request');
+    yield reportNoUnresolvedThreads(loggingService, context, octokit);
 });
 const checkForUnresolvedThreads = (loggingService, context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(loggingService, octokit, context.repoOwner, context.repoName, context.pullRequest.number);

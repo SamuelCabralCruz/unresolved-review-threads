@@ -52,6 +52,80 @@ describe('handler', () => {
     let context: Partial<UnresolvedActionContext>
     let unresolvedThreads: UnresolvedThreads
 
+    const shouldReportNoUnresolvedThreads = () => {
+      test('should remove unresolved threads label', async () => {
+        await actCall()
+
+        expect(removeLabelMock).toHaveBeenCalledWith(
+          octokitClient,
+          repo.repoOwner,
+          repo.repoName,
+          pullRequest,
+          unresolvedLabel,
+        )
+      })
+
+      test('should log label removal', async () => {
+        await actCall()
+
+        expect(loggingService.info).toHaveBeenCalledWith(
+          'Unresolved label trigger removed from pull request',
+        )
+      })
+
+      test('should set check status as success', async () => {
+        await actCall()
+
+        expect(setCheckStatusAsSuccessMock).toHaveBeenCalledWith(octokitClient, context)
+      })
+
+      test('should log check success', async () => {
+        await actCall()
+
+        expect(loggingService.info).toHaveBeenCalledWith(
+          'Success status check added to pull request',
+        )
+      })
+    }
+
+    const shouldReportUnresolvedThreads = () => {
+      test('should add unresolved threads label', async () => {
+        await actCall()
+
+        expect(addLabelMock).toHaveBeenCalledWith(
+          octokitClient,
+          repo.repoOwner,
+          repo.repoName,
+          pullRequest,
+          unresolvedLabel,
+        )
+      })
+
+      test('should log label addition', async () => {
+        await actCall()
+
+        expect(loggingService.info).toHaveBeenCalledWith(
+          'Unresolved label trigger added to pull request',
+        )
+      })
+
+      test('should set check status as failure', async () => {
+        await actCall()
+
+        expect(setCheckStatusAsFailureMock).toHaveBeenCalledWith(
+          octokitClient,
+          context,
+          unresolvedThreads.numberOfUnresolved,
+        )
+      })
+
+      test('should log check failure', async () => {
+        await actCall()
+
+        expect(loggingService.info).toHaveBeenCalledWith('Fail status check added to pull request')
+      })
+    }
+
     beforeEach(() => {
       context = {
         ...repo,
@@ -95,43 +169,7 @@ describe('handler', () => {
       })
 
       describe('with unresolved threads', () => {
-        test('should add unresolved threads label', async () => {
-          await actCall()
-
-          expect(addLabelMock).toHaveBeenCalledWith(
-            octokitClient,
-            repo.repoOwner,
-            repo.repoName,
-            pullRequest,
-            unresolvedLabel,
-          )
-        })
-
-        test('should log label addition', async () => {
-          await actCall()
-
-          expect(loggingService.info).toHaveBeenCalledWith(
-            'Unresolved label trigger added to pull request',
-          )
-        })
-
-        test('should set check status as failure', async () => {
-          await actCall()
-
-          expect(setCheckStatusAsFailureMock).toHaveBeenCalledWith(
-            octokitClient,
-            context,
-            unresolvedThreads.numberOfUnresolved,
-          )
-        })
-
-        test('should log check failure', async () => {
-          await actCall()
-
-          expect(loggingService.info).toHaveBeenCalledWith(
-            'Fail status check added to pull request',
-          )
-        })
+        shouldReportUnresolvedThreads()
       })
 
       describe('without unresolved threads', () => {
@@ -142,39 +180,7 @@ describe('handler', () => {
           })
         })
 
-        test('should remove unresolved threads label', async () => {
-          await actCall()
-
-          expect(removeLabelMock).toHaveBeenCalledWith(
-            octokitClient,
-            repo.repoOwner,
-            repo.repoName,
-            pullRequest,
-            unresolvedLabel,
-          )
-        })
-
-        test('should log label removal', async () => {
-          await actCall()
-
-          expect(loggingService.info).toHaveBeenCalledWith(
-            'Unresolved label trigger removed from pull request',
-          )
-        })
-
-        test('should set check status as success', async () => {
-          await actCall()
-
-          expect(setCheckStatusAsSuccessMock).toHaveBeenCalledWith(octokitClient, context)
-        })
-
-        test('should log check success', async () => {
-          await actCall()
-
-          expect(loggingService.info).toHaveBeenCalledWith(
-            'Success status check added to pull request',
-          )
-        })
+        shouldReportNoUnresolvedThreads()
       })
     })
 
@@ -192,19 +198,7 @@ describe('handler', () => {
         )
       })
 
-      test('should set check status as success', async () => {
-        await actCall()
-
-        expect(setCheckStatusAsSuccessMock).toHaveBeenCalledWith(octokitClient, context)
-      })
-
-      test('should log check success', async () => {
-        await actCall()
-
-        expect(loggingService.info).toHaveBeenCalledWith(
-          'Success status check added to pull request',
-        )
-      })
+      shouldReportNoUnresolvedThreads()
     })
   })
 
