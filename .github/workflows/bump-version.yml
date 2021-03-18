@@ -14,20 +14,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Temporarily Disable "include administrators" Branch Protection
-        uses: benjefferies/branch-protection-bot@master
-        if: always()
-        with:
-          access-token: ${{ secrets.ACCESS_TOKEN }}
-
       - name: Patch Version
         run: |
           yarn version --patch
           git add -A
           git push
-
-      - name: Enable "include administrators" Branch Protection
-        uses: benjefferies/branch-protection-bot@master
-        if: always()
-        with:
-          access-token: ${{ secrets.ACCESS_TOKEN }}
