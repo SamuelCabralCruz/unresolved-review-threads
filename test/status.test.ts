@@ -1,6 +1,6 @@
 import * as faker from 'faker'
 
-import { PullRequestContext } from '@/src/context'
+import { UnresolvedActionContext } from '@/src/context'
 import { setCheckStatusAsFailure, setCheckStatusAsSuccess } from '@/src/status'
 import { generatePullRequest } from '@/test/fixture/pullRequest.fixture'
 import { generateRepo } from '@/test/fixture/repo.fixture'
@@ -15,7 +15,7 @@ describe('status', () => {
   const { repoOwner, repoName } = generateRepo()
   const pullRequest = generatePullRequest()
   const runId = faker.random.number()
-  const context: Partial<PullRequestContext> = { repoOwner, repoName, pullRequest, runId }
+  const context: Partial<UnresolvedActionContext> = { repoOwner, repoName, pullRequest, runId }
 
   describe('setCheckStatusAsSuccess', () => {
     const act = setCheckStatusAsSuccess

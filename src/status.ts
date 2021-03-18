@@ -1,9 +1,9 @@
-import { PullRequestContext } from '@/src/context'
+import { UnresolvedActionContext } from '@/src/context'
 import { OctokitClient } from '@/src/octokitClient'
 
 const setCheckStatus = async (
   octokit: OctokitClient,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
   state: 'success' | 'failure',
   description: string,
 ) => {
@@ -20,14 +20,14 @@ const setCheckStatus = async (
 
 export const setCheckStatusAsSuccess = async (
   octokit: OctokitClient,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
 ): Promise<void> => {
   await setCheckStatus(octokit, context, 'success', 'no unresolved thread found')
 }
 
 export const setCheckStatusAsFailure = async (
   octokit: OctokitClient,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
   numberOfUnresolvedThreads: number,
 ): Promise<void> => {
   await setCheckStatus(

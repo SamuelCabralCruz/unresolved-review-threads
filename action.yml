@@ -2,20 +2,8 @@ name: "Unresolved Review Threads"
 description: "Prevent merge of pull request having unresolved review threads"
 author: "SamuelCabralCruz"
 inputs:
-  useLabelTrigger:
-    description: "Flag indicating if label should be use to manually trigger the action. (default: true)"
-    required: false
   unresolvedLabel:
     description: "Specify the name of the label to mark a pull request having unresolved review threads. (default: 'unresolvedThreads')"
-    required: false
-  useCommentTrigger:
-    description: "Flag indicating if comment should be used to manually trigger the action. (default: false)"
-    required: false
-  resolvedCommentTrigger:
-    description: "Specify the content of the comment to manually trigger the check when all review threads are resolved. (default: 'LGTM')"
-    required: false
-  deleteResolvedCommentTrigger:
-    description: "Flag indicating if comment used to manually trigger the action should be deleted. (default: true)"
     required: false
 runs:
   using: "node12"

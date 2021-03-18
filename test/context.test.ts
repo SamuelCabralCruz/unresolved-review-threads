@@ -1,20 +1,20 @@
 import * as faker from 'faker'
+import { mocked } from 'ts-jest/utils'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { Context } from '@actions/github/lib/context'
 
 import { getContext } from '@/src/context'
-import { AtLeastOneTriggerOptionEnabledError } from '@/src/error/atLeastOneTriggerOptionEnabledError'
-import { DefinedDeleteResolvedCommentWithDisabledTriggerError } from '@/src/error/definedDeleteResolvedCommentWithDisabledTriggerError'
-import { DefinedResolvedCommentWithDisabledTriggerError } from '@/src/error/definedResolvedCommentWithDisabledTriggerError'
-import { DefinedUnresolvedLabelWithDisabledTriggerError } from '@/src/error/definedUnresolvedLabelWithDisabledTriggerError'
-import { InvalidBooleanInputError } from '@/src/error/invalidBooleanInputError'
-import { InvalidEventTypeError } from '@/src/error/invalidEventTypeError'
 import { NoAssociatedPullRequestError } from '@/src/error/noAssociatedPullRequestError'
 import { EventType } from '@/src/eventType'
+import { getPullRequest, PullRequest } from '@/src/pullRequest'
+import { generatePullRequest } from '@/test/fixture/pullRequest.fixture'
 import { generateRepo } from '@/test/fixture/repo.fixture'
 import { PartialLoggingServiceMock } from '@/test/typing/loggingService.helper'
-import { PartialOctokitClientMock } from '@/test/typing/octokit.helper'
+import { octokitClientPlaceholderMock } from '@/test/typing/octokit.helper'
+
+jest.mock('@/src/pullRequest')
+const getPullRequestMock = mocked(getPullRequest, true)
 
 describe('context', () => {
   describe('getContext', () => {
@@ -22,25 +22,22 @@ describe('context', () => {
     const loggingService: PartialLoggingServiceMock<'debug'> = {
       debug: jest.fn(),
     }
-    const octokitClient: PartialOctokitClientMock<any> = {}
-
-    const actCall = async () => await act(loggingService as any, octokitClient as any)
+    const actCall = async () =>
+      await act(loggingService as any, octokitClientPlaceholderMock as any)
 
     let inputs: { [key: string]: string }
+    let pullRequest: PullRequest
     let githubContext: Partial<Context>
 
-    beforeEach(() => {
+    const resetMocks = () => {
       inputs = {}
-      jest.spyOn(core, 'getInput').mockImplementation((name: string): string => inputs[name] || '')
+      pullRequest = generatePullRequest()
       githubContext = {
         eventName: 'pull_request',
         payload: {
           action: 'opened',
           pull_request: {
-            number: faker.random.number(),
-            head: {
-              sha: faker.git.commitSha(),
-            },
+            number: pullRequest.number,
           },
         },
         repo: {
@@ -48,6 +45,12 @@ describe('context', () => {
           repo: faker.company.bsNoun(),
         },
       }
+    }
+
+    beforeEach(() => {
+      resetMocks()
+      getPullRequestMock.mockResolvedValue(pullRequest)
+      jest.spyOn(core, 'getInput').mockImplementation((name: string): string => inputs[name] || '')
       Object.defineProperty(github, 'context', {
         configurable: true,
         writable: false,
@@ -74,127 +77,23 @@ describe('context', () => {
     })
 
     describe('inputs parsing', () => {
-      test('without use label trigger should use default value', async () => {
-        const observed = await actCall()
-
-        expect(observed.useLabelTrigger).toBe(true)
-      })
-
-      test('with invalid use label trigger input should throw', async () => {
-        inputs['useLabelTrigger'] = 'invalid'
-
-        await expect(actCall).rejects.toThrowError(InvalidBooleanInputError)
-      })
-
       test('without unresolved label should use default value', async () => {
         const observed = await actCall()
 
         expect(observed.unresolvedLabel).toEqual('unresolvedThreads')
       })
 
-      test('without use comment trigger should use default value', async () => {
+      test('with unresolved label should use provided value', async () => {
+        Object.assign(inputs, { unresolvedLabel: 'some customized value' })
+
         const observed = await actCall()
 
-        expect(observed.useCommentTrigger).toBe(false)
-      })
-
-      test('without resolved comment trigger should use default value', async () => {
-        const observed = await actCall()
-
-        expect(observed.resolvedCommentTrigger).toEqual('LGTM')
-      })
-
-      test('without delete resolved comment trigger should use default value', async () => {
-        const observed = await actCall()
-
-        expect(observed.deleteResolvedCommentTrigger).toBe(true)
-      })
-
-      test('without delete resolved comment trigger should use default value', async () => {
-        const observed = await actCall()
-
-        expect(observed.deleteResolvedCommentTrigger).toBe(true)
-      })
-
-      test('with invalid use comment trigger input should throw', async () => {
-        inputs['useCommentTrigger'] = 'invalid'
-
-        await expect(actCall).rejects.toThrowError(InvalidBooleanInputError)
-      })
-
-      test('without enabled trigger should throw', async () => {
-        inputs['useLabelTrigger'] = 'false'
-        inputs['useCommentTrigger'] = 'false'
-
-        await expect(actCall).rejects.toThrowError(AtLeastOneTriggerOptionEnabledError)
-      })
-
-      test('with disabled label trigger and unresolved label override should throw', async () => {
-        inputs['useLabelTrigger'] = 'false'
-        inputs['unresolvedLabel'] = 'some customized value'
-        inputs['useCommentTrigger'] = 'true'
-
-        await expect(actCall).rejects.toThrowError(DefinedUnresolvedLabelWithDisabledTriggerError)
-      })
-
-      test('with disabled comment trigger and resolved comment trigger override should throw', async () => {
-        inputs['resolvedCommentTrigger'] = 'some customized value'
-
-        await expect(actCall).rejects.toThrowError(DefinedResolvedCommentWithDisabledTriggerError)
-      })
-
-      test('with disabled comment trigger and delete resolved comment trigger override should throw', async () => {
-        inputs['deleteResolvedCommentTrigger'] = 'false'
-
-        await expect(actCall).rejects.toThrowError(
-          DefinedDeleteResolvedCommentWithDisabledTriggerError,
-        )
+        expect(observed.unresolvedLabel).toEqual('some customized value')
       })
 
       test.each([
         {
           unresolvedLabel: 'some customized value',
-        },
-        {
-          useLabelTrigger: 'true',
-          unresolvedLabel: 'some customized value',
-        },
-        {
-          useLabelTrigger: 'false',
-          useCommentTrigger: 'true',
-        },
-        {
-          useCommentTrigger: 'true',
-        },
-        {
-          useCommentTrigger: 'true',
-          resolvedCommentTrigger: 'some customized value',
-        },
-        {
-          useCommentTrigger: 'true',
-          deleteResolvedCommentTrigger: 'false',
-        },
-        {
-          useCommentTrigger: 'true',
-          deleteResolvedCommentTrigger: 'true',
-        },
-        {
-          useLabelTrigger: 'false',
-          useCommentTrigger: 'true',
-          resolvedCommentTrigger: 'some customized value',
-        },
-        {
-          useLabelTrigger: 'false',
-          useCommentTrigger: 'true',
-          resolvedCommentTrigger: 'some customized value',
-          deleteResolvedCommentTrigger: 'false',
-        },
-        {
-          useLabelTrigger: 'true',
-          unresolvedLabel: 'some customized value',
-          useCommentTrigger: 'true',
-          resolvedCommentTrigger: 'some customized value',
-          deleteResolvedCommentTrigger: 'false',
         },
       ])('with valid input configuration should not throw', async (inputsOverrides: any) => {
         Object.assign(inputs, inputsOverrides)
@@ -206,17 +105,6 @@ describe('context', () => {
     })
 
     describe('github context parsing', () => {
-      test.each([
-        ['', 'opened'],
-        ['pull_request', ''],
-        ['pull_request', 'created'],
-      ])('with unknown event type should throw', async (eventName: string, eventAction: string) => {
-        githubContext.eventName = eventName
-        githubContext.payload!.action = eventAction
-
-        await expect(actCall).rejects.toThrowError(InvalidEventTypeError)
-      })
-
       test('without pull request associated to event should throw', async () => {
         githubContext.payload!.pull_request = undefined
 
@@ -224,13 +112,9 @@ describe('context', () => {
       })
     })
 
-    test('should extract common context properly', async () => {
+    test('should extract context properly', async () => {
       Object.assign(inputs, {
-        useLabelTrigger: 'true',
         unresolvedLabel: 'some unresolved label',
-        useCommentTrigger: 'true',
-        resolvedCommentTrigger: 'some resolved comment trigger',
-        deleteResolvedCommentTrigger: 'false',
       })
       const runId = faker.random.number()
       const { repoOwner, repoName } = generateRepo()
@@ -242,9 +126,6 @@ describe('context', () => {
           action: 'created',
           pull_request: {
             number: faker.random.number(),
-            head: {
-              sha: faker.git.commitSha(),
-            },
           },
         },
         runId,
@@ -259,21 +140,14 @@ describe('context', () => {
       const observed = await actCall()
 
       expect(observed).toMatchObject({
-        useLabelTrigger: true,
         unresolvedLabel: 'some unresolved label',
-        useCommentTrigger: true,
-        resolvedCommentTrigger: 'some resolved comment trigger',
-        deleteResolvedCommentTrigger: false,
         eventType: EventType.PULL_REQUEST_REVIEW_COMMENT_CREATED,
-        triggerType: 'other',
         runId,
         workflowName,
         jobName,
         repoOwner,
         repoName,
-        labelTriggeredEvent: false,
-        commentTriggeredEvent: false,
-        shouldProcessEvent: true,
+        pullRequest,
       })
     })
   })
