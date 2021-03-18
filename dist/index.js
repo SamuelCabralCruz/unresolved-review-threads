@@ -5949,10 +5949,13 @@ const github = __importStar(__nccwpck_require__(3737));
 const noAssociatedPullRequestError_1 = __nccwpck_require__(2255);
 const eventType_1 = __nccwpck_require__(3405);
 const pullRequest_1 = __nccwpck_require__(3779);
-const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads';
-const getUnresolvedLabel = () => core.getInput('unresolvedLabel') || DEFAULT_VALUE_UNRESOLVED_LABEL;
+const UNRESOLVED_LABEL_DEFAULT_VALUE = 'unresolvedThreads';
+const BYPASS_LABEL_DEFAULT_VALUE = 'ignoreUnresolved';
+const getUnresolvedLabel = () => core.getInput('unresolvedLabel') || UNRESOLVED_LABEL_DEFAULT_VALUE;
+const getBypassLabel = () => core.getInput('bypassLabel') || BYPASS_LABEL_DEFAULT_VALUE;
 const parseInputs = () => ({
     unresolvedLabel: getUnresolvedLabel(),
+    bypassLabel: getBypassLabel(),
 });
 const getEventType = () => {
     const eventName = github.context.eventName;
@@ -6204,6 +6207,11 @@ const baseError_1 = __nccwpck_require__(1356);
 const label_1 = __nccwpck_require__(637);
 const status_1 = __nccwpck_require__(2886);
 const unresolvedThread_1 = __nccwpck_require__(9796);
+const bypassCheck = (loggingService, octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
+    yield loggingService.info('Bypass label found on the pull request', 'Unresolved Threads Check Skipped');
+    yield status_1.setCheckStatusAsSuccess(octokit, context);
+    yield loggingService.info('Success status check added to pull request');
+});
 const checkForUnresolvedThreads = (loggingService, context, octokit) => __awaiter(void 0, void 0, void 0, function* () {
     const unresolvedThreads = yield unresolvedThread_1.scanPullRequestForUnresolvedReviewThreads(loggingService, octokit, context.repoOwner, context.repoName, context.pullRequest.number);
     yield loggingService.info(`Number of unresolved review threads found: ${unresolvedThreads.numberOfUnresolved}`);
@@ -6221,12 +6229,17 @@ const reportNoUnresolvedThreads = (loggingService, context, octokit) => __awaite
     yield status_1.setCheckStatusAsSuccess(octokit, context);
     yield loggingService.info('Success status check added to pull request');
 });
-const handleEvent = (loggingService, octokit) => __awaiter(void 0, void 0, void 0, function* () {
-    const context = yield context_1.getContext(loggingService, octokit);
+const performCheck = (loggingService, octokit, context) => __awaiter(void 0, void 0, void 0, function* () {
     const { anyUnresolved, numberOfUnresolved } = yield checkForUnresolvedThreads(loggingService, context, octokit);
     anyUnresolved
         ? yield reportUnresolvedThreads(loggingService, context, octokit, numberOfUnresolved)
         : yield reportNoUnresolvedThreads(loggingService, context, octokit);
+});
+const handleEvent = (loggingService, octokit) => __awaiter(void 0, void 0, void 0, function* () {
+    const context = yield context_1.getContext(loggingService, octokit);
+    label_1.hasLabel(context.pullRequest, context.bypassLabel)
+        ? yield bypassCheck(loggingService, octokit, context)
+        : yield performCheck(loggingService, octokit, context);
 });
 exports.handleEvent = handleEvent;
 const handleError = (loggingService, error) => __awaiter(void 0, void 0, void 0, function* () {
@@ -6260,9 +6273,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.removeLabel = exports.addLabel = exports.hasLabel = void 0;
-const hasLabel = (pullRequest, labelName) => {
-    return !!pullRequest.labels.filter((x) => x.name === labelName).length;
-};
+const hasLabel = (pullRequest, labelName) => pullRequest.labels.map((x) => x.name).includes(labelName);
 exports.hasLabel = hasLabel;
 const addLabel = (octokit, repoOwner, repoName, pullRequest, labelName) => __awaiter(void 0, void 0, void 0, function* () {
     if (!exports.hasLabel(pullRequest, labelName)) {

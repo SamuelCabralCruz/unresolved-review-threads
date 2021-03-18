@@ -23,7 +23,14 @@ const scanPullRequestForUnresolvedReviewThreadsMock = mocked(
   scanPullRequestForUnresolvedReviewThreads,
   true,
 )
-jest.mock('@/src/label')
+jest.mock('@/src/label', () => {
+  const labelModule = jest.requireActual('@/src/label')
+  return {
+    ...labelModule,
+    addLabel: jest.fn(),
+    removeLabel: jest.fn(),
+  }
+})
 const addLabelMock = mocked(addLabel, true)
 const removeLabelMock = mocked(removeLabel, true)
 jest.mock('@/src/status')
@@ -41,6 +48,7 @@ describe('handler', () => {
     const repo = generateRepo()
     const pullRequest = generatePullRequest()
     const unresolvedLabel = 'some unresolved label'
+    const bypassLabel = 'some bypass label'
     let context: Partial<UnresolvedActionContext>
     let unresolvedThreads: UnresolvedThreads
 
@@ -49,6 +57,7 @@ describe('handler', () => {
         ...repo,
         pullRequest,
         unresolvedLabel,
+        bypassLabel,
       }
       unresolvedThreads = {
         anyUnresolved: true,
@@ -64,89 +73,122 @@ describe('handler', () => {
       expect(getContextMock).toHaveBeenCalledWith(loggingService, octokitClient)
     })
 
-    test('should scan pull request for unresolved review threads', async () => {
-      await actCall()
-
-      expect(scanPullRequestForUnresolvedReviewThreadsMock).toHaveBeenCalledWith(
-        loggingService,
-        octokitClient,
-        repo.repoOwner,
-        repo.repoName,
-        pullRequest.number,
-      )
-    })
-
-    test('should log number of unresolved threads found', async () => {
-      await actCall()
-
-      expect(loggingService.info).toHaveBeenCalledWith(
-        'Number of unresolved review threads found: 5',
-      )
-    })
-
-    describe('with unresolved threads', () => {
-      test('should add unresolved threads label', async () => {
+    describe('without check bypass', () => {
+      test('should scan pull request for unresolved review threads', async () => {
         await actCall()
 
-        expect(addLabelMock).toHaveBeenCalledWith(
+        expect(scanPullRequestForUnresolvedReviewThreadsMock).toHaveBeenCalledWith(
+          loggingService,
           octokitClient,
           repo.repoOwner,
           repo.repoName,
-          pullRequest,
-          unresolvedLabel,
+          pullRequest.number,
         )
       })
 
-      test('should log label addition', async () => {
+      test('should log number of unresolved threads found', async () => {
         await actCall()
 
         expect(loggingService.info).toHaveBeenCalledWith(
-          'Unresolved label trigger added to pull request',
+          'Number of unresolved review threads found: 5',
         )
       })
 
-      test('should set check status as failure', async () => {
-        await actCall()
+      describe('with unresolved threads', () => {
+        test('should add unresolved threads label', async () => {
+          await actCall()
 
-        expect(setCheckStatusAsFailureMock).toHaveBeenCalledWith(
-          octokitClient,
-          context,
-          unresolvedThreads.numberOfUnresolved,
-        )
-      })
+          expect(addLabelMock).toHaveBeenCalledWith(
+            octokitClient,
+            repo.repoOwner,
+            repo.repoName,
+            pullRequest,
+            unresolvedLabel,
+          )
+        })
 
-      test('should log check failure', async () => {
-        await actCall()
+        test('should log label addition', async () => {
+          await actCall()
 
-        expect(loggingService.info).toHaveBeenCalledWith('Fail status check added to pull request')
-      })
-    })
+          expect(loggingService.info).toHaveBeenCalledWith(
+            'Unresolved label trigger added to pull request',
+          )
+        })
 
-    describe('without unresolved threads', () => {
-      beforeEach(() => {
-        Object.assign(unresolvedThreads, {
-          anyUnresolved: false,
-          numberOfUnresolved: 0,
+        test('should set check status as failure', async () => {
+          await actCall()
+
+          expect(setCheckStatusAsFailureMock).toHaveBeenCalledWith(
+            octokitClient,
+            context,
+            unresolvedThreads.numberOfUnresolved,
+          )
+        })
+
+        test('should log check failure', async () => {
+          await actCall()
+
+          expect(loggingService.info).toHaveBeenCalledWith(
+            'Fail status check added to pull request',
+          )
         })
       })
 
-      test('should remove unresolved threads label', async () => {
-        await actCall()
+      describe('without unresolved threads', () => {
+        beforeEach(() => {
+          Object.assign(unresolvedThreads, {
+            anyUnresolved: false,
+            numberOfUnresolved: 0,
+          })
+        })
 
-        expect(removeLabelMock).toHaveBeenCalledWith(
-          octokitClient,
-          repo.repoOwner,
-          repo.repoName,
-          pullRequest,
-          unresolvedLabel,
-        )
+        test('should remove unresolved threads label', async () => {
+          await actCall()
+
+          expect(removeLabelMock).toHaveBeenCalledWith(
+            octokitClient,
+            repo.repoOwner,
+            repo.repoName,
+            pullRequest,
+            unresolvedLabel,
+          )
+        })
+
+        test('should log label removal', async () => {
+          await actCall()
+
+          expect(loggingService.info).toHaveBeenCalledWith(
+            'Unresolved label trigger removed from pull request',
+          )
+        })
+
+        test('should set check status as success', async () => {
+          await actCall()
+
+          expect(setCheckStatusAsSuccessMock).toHaveBeenCalledWith(octokitClient, context)
+        })
+
+        test('should log check success', async () => {
+          await actCall()
+
+          expect(loggingService.info).toHaveBeenCalledWith(
+            'Success status check added to pull request',
+          )
+        })
+      })
+    })
+
+    describe('with check bypass', () => {
+      beforeEach(() => {
+        pullRequest.labels.push({ name: bypassLabel })
       })
 
-      test('should log label removal', async () => {
+      test('should log bypass detection', async () => {
         await actCall()
 
         expect(loggingService.info).toHaveBeenCalledWith(
-          'Unresolved label trigger removed from pull request',
+          'Bypass label found on the pull request',
+          'Unresolved Threads Check Skipped',
         )
       })
 

@@ -11,6 +11,7 @@ import { getPullRequest, PullRequest } from '@/src/pullRequest'
 export type UnresolvedActionContext = Readonly<{
   // inputs
   unresolvedLabel: string
+  bypassLabel: string
   // github
   eventType: EventType
   runId: number
@@ -22,13 +23,16 @@ export type UnresolvedActionContext = Readonly<{
   pullRequest: PullRequest
 }>
 
-const DEFAULT_VALUE_UNRESOLVED_LABEL = 'unresolvedThreads'
+const UNRESOLVED_LABEL_DEFAULT_VALUE = 'unresolvedThreads'
+const BYPASS_LABEL_DEFAULT_VALUE = 'ignoreUnresolved'
 
 const getUnresolvedLabel = (): string =>
-  core.getInput('unresolvedLabel') || DEFAULT_VALUE_UNRESOLVED_LABEL
+  core.getInput('unresolvedLabel') || UNRESOLVED_LABEL_DEFAULT_VALUE
+const getBypassLabel = (): string => core.getInput('bypassLabel') || BYPASS_LABEL_DEFAULT_VALUE
 
 const parseInputs = () => ({
   unresolvedLabel: getUnresolvedLabel(),
+  bypassLabel: getBypassLabel(),
 })
 
 const getEventType = (): EventType => {

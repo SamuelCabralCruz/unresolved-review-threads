@@ -91,9 +91,31 @@ describe('context', () => {
         expect(observed.unresolvedLabel).toEqual('some customized value')
       })
 
+      test('without bypass label should use default value', async () => {
+        const observed = await actCall()
+
+        expect(observed.bypassLabel).toEqual('ignoreUnresolved')
+      })
+
+      test('with bypass label should use provided value', async () => {
+        Object.assign(inputs, { bypassLabel: 'some customized value' })
+
+        const observed = await actCall()
+
+        expect(observed.bypassLabel).toEqual('some customized value')
+      })
+
       test.each([
+        {},
         {
           unresolvedLabel: 'some customized value',
+        },
+        {
+          bypassLabel: 'some customized value',
+        },
+        {
+          unresolvedLabel: 'some customized value',
+          bypassLabel: 'some customized value',
         },
       ])('with valid input configuration should not throw', async (inputsOverrides: any) => {
         Object.assign(inputs, inputsOverrides)

@@ -2,7 +2,7 @@ import * as core from '@actions/core'
 
 import { getContext, UnresolvedActionContext } from '@/src/context'
 import { BaseError } from '@/src/error/baseError'
-import { addLabel, removeLabel } from '@/src/label'
+import { addLabel, hasLabel, removeLabel } from '@/src/label'
 import { LoggingService } from '@/src/loggingService'
 import { OctokitClient } from '@/src/octokitClient'
 import { setCheckStatusAsFailure, setCheckStatusAsSuccess } from '@/src/status'
@@ -10,6 +10,19 @@ import {
   scanPullRequestForUnresolvedReviewThreads,
   UnresolvedThreads,
 } from '@/src/unresolvedThread'
+
+const bypassCheck = async (
+  loggingService: LoggingService,
+  octokit: OctokitClient,
+  context: UnresolvedActionContext,
+): Promise<void> => {
+  await loggingService.info(
+    'Bypass label found on the pull request',
+    'Unresolved Threads Check Skipped',
+  )
+  await setCheckStatusAsSuccess(octokit, context)
+  await loggingService.info('Success status check added to pull request')
+}
 
 const checkForUnresolvedThreads = async (
   loggingService: LoggingService,
@@ -64,11 +77,11 @@ const reportNoUnresolvedThreads = async (
   await loggingService.info('Success status check added to pull request')
 }
 
-export const handleEvent = async (
+const performCheck = async (
   loggingService: LoggingService,
   octokit: OctokitClient,
+  context: UnresolvedActionContext,
 ): Promise<void> => {
-  const context = await getContext(loggingService, octokit)
   const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(
     loggingService,
     context,
@@ -77,6 +90,16 @@ export const handleEvent = async (
   anyUnresolved
     ? await reportUnresolvedThreads(loggingService, context, octokit, numberOfUnresolved)
     : await reportNoUnresolvedThreads(loggingService, context, octokit)
+}
+
+export const handleEvent = async (
+  loggingService: LoggingService,
+  octokit: OctokitClient,
+): Promise<void> => {
+  const context = await getContext(loggingService, octokit)
+  hasLabel(context.pullRequest, context.bypassLabel)
+    ? await bypassCheck(loggingService, octokit, context)
+    : await performCheck(loggingService, octokit, context)
 }
 
 export const handleError = async (loggingService: LoggingService, error: Error): Promise<void> => {
