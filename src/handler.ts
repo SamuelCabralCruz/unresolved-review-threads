@@ -20,8 +20,7 @@ const bypassCheck = async (
     'Bypass label found on the pull request',
     'Unresolved Threads Check Skipped',
   )
-  await setCheckStatusAsSuccess(octokit, context)
-  await loggingService.info('Success status check added to pull request')
+  await reportNoUnresolvedThreads(loggingService, context, octokit)
 }
 
 const checkForUnresolvedThreads = async (
