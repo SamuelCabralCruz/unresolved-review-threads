@@ -121,9 +121,9 @@ describe('context', () => {
       const workflowName = faker.commerce.department()
       const jobName = faker.commerce.product()
       Object.assign(githubContext, {
-        eventName: 'pull_request_review_comment',
+        eventName: 'pull_request_review',
         payload: {
-          action: 'created',
+          action: 'submitted',
           pull_request: {
             number: faker.random.number(),
           },
@@ -141,7 +141,7 @@ describe('context', () => {
 
       expect(observed).toMatchObject({
         unresolvedLabel: 'some unresolved label',
-        eventType: EventType.PULL_REQUEST_REVIEW_COMMENT_CREATED,
+        eventType: EventType.PULL_REQUEST_REVIEW_SUBMITTED,
         runId,
         workflowName,
         jobName,

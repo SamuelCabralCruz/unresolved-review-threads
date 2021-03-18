@@ -10,13 +10,14 @@ describe('EventType', () => {
     test.each([
       [faker.lorem.word(), faker.lorem.word()],
       ['pull_request', faker.lorem.word()],
+      ['pull_request_review', faker.lorem.word()],
       ['pull_request_review_comment', faker.lorem.word()],
     ])(
       'should throw on unknown combination of event name and action',
       (eventName: string, eventAction: string) => {
         const actCall = () => act(eventName, eventAction)
 
-        expect(actCall).toThrowError(InvalidEventTypeError)
+        expect(actCall).toThrowError(new InvalidEventTypeError(eventName, eventAction))
       },
     )
 
@@ -26,7 +27,11 @@ describe('EventType', () => {
       ['pull_request', 'labeled', EventType.PULL_REQUEST_LABELED],
       ['pull_request', 'unlabeled', EventType.PULL_REQUEST_UNLABELED],
       ['pull_request', 'synchronize', EventType.PULL_REQUEST_SYNCHRONIZE],
-      ['pull_request_review_comment', 'created', EventType.PULL_REQUEST_REVIEW_COMMENT_CREATED],
+      ['pull_request', 'review_requested', EventType.PULL_REQUEST_REVIEW_REQUESTED],
+      ['pull_request', 'review_request_removed', EventType.PULL_REQUEST_REVIEW_REQUEST_REMOVED],
+      ['pull_request_review', 'submitted', EventType.PULL_REQUEST_REVIEW_SUBMITTED],
+      ['pull_request_review', 'edited', EventType.PULL_REQUEST_REVIEW_EDITED],
+      ['pull_request_review', 'dismissed', EventType.PULL_REQUEST_REVIEW_DISMISSED],
       ['pull_request_review_comment', 'edited', EventType.PULL_REQUEST_REVIEW_COMMENT_EDITED],
       ['pull_request_review_comment', 'deleted', EventType.PULL_REQUEST_REVIEW_COMMENT_DELETED],
     ])(

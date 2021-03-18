@@ -12,10 +12,13 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
   name: 'Unresolved Review Threads'
   on:
     pull_request_review_comment:
-      types: [created, edited, deleted]
+      types: [edited, deleted]
+  
+    pull_request_review:
+      types: [submitted, edited, dismissed]
 
     pull_request:
-      types: [opened, reopened, labeled, unlabeled]
+      types: [opened, reopened, labeled, unlabeled, synchronize, review_requested, review_request_removed]
       branches:
         - main
 
@@ -31,6 +34,31 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 - If no label input is provided, the action will use a label named `unresolvedThreads` by default.
 - Don't forget to enforce the check in your branch rule settings
 
+## Probot/Settings
+
+If you use [probot/settings](https://github.com/probot/settings) to configure your repository, you should edit your `settings.yml` with something similar to the following.
+
+  ```yaml
+  labels:
+    ...
+    - name: unresolvedThreads
+      color: '#333333'
+      description: Add or remove this label to manually trigger UnresolvedReviewThreads check.
+
+  branches:
+    - name: main
+      protection:
+        required_status_checks:
+          strict: true
+          contexts: ['Unresolved Review Threads']
+        enforce_admins: true
+        required_linear_history: true
+        restrictions:
+          apps: []
+          users: []
+          teams: []
+  ```
+
 ## Inputs
 
 - `unresolvedLabel`: Specify the name of the label to mark a pull request having unresolved review threads.
@@ -41,7 +69,7 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 
 - This action flow is currently a lot more complicated than it would otherwise be if GitHub Actions could be triggered on
   - Limitations
-    - `pull_request_review_comment` with types: ['created', 'deleted', 'resolved', 'unresolved']
+    - `pull_request_review_comment` with types: ['resolved', 'unresolved']
     - `issue_comment` with types: ['reaction']
   - Please take time to go upvote the following tickets to help make this change happen
     - [GitHub Community #132292](https://github.community/t/feature-request-event-trigger-on-pr-review-comment-resolution-change/132292)
