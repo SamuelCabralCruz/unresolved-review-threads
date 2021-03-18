@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 
-import { deleteComment } from '@/src/comment'
-import { CommentCreatedContext, getContext, PullRequestContext } from '@/src/context'
+import { getContext, UnresolvedActionContext } from '@/src/context'
 import { BaseError } from '@/src/error/baseError'
 import { addLabel, removeLabel } from '@/src/label'
 import { LoggingService } from '@/src/loggingService'
@@ -12,22 +11,9 @@ import {
   UnresolvedThreads,
 } from '@/src/unresolvedThread'
 
-const deleteSynchronisationCommentTrigger = async (
-  loggingService: LoggingService,
-  context: CommentCreatedContext,
-  octokit: OctokitClient,
-) => {
-  if (context.deleteResolvedCommentTrigger != null) {
-    await deleteComment(octokit, context.repoOwner, context.repoName, context.commentId)
-    await loggingService.info(
-      `Deleting synchronisation comment trigger with id ${context.commentId}`,
-    )
-  }
-}
-
 const checkForUnresolvedThreads = async (
   loggingService: LoggingService,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
   octokit: OctokitClient,
 ): Promise<UnresolvedThreads> => {
   const unresolvedThreads = await scanPullRequestForUnresolvedReviewThreads(
@@ -45,39 +31,35 @@ const checkForUnresolvedThreads = async (
 
 const reportUnresolvedThreads = async (
   loggingService: LoggingService,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
   octokit: OctokitClient,
   numberOfUnresolved: number,
 ) => {
-  if (context.useLabelTrigger) {
-    await addLabel(
-      octokit,
-      context.repoOwner,
-      context.repoName,
-      context.pullRequest,
-      context.unresolvedLabel,
-    )
-    await loggingService.info('Unresolved label trigger added to pull request')
-  }
+  await addLabel(
+    octokit,
+    context.repoOwner,
+    context.repoName,
+    context.pullRequest,
+    context.unresolvedLabel,
+  )
+  await loggingService.info('Unresolved label trigger added to pull request')
   await setCheckStatusAsFailure(octokit, context, numberOfUnresolved)
   await loggingService.info('Fail status check added to pull request')
 }
 
 const reportNoUnresolvedThreads = async (
   loggingService: LoggingService,
-  context: PullRequestContext,
+  context: UnresolvedActionContext,
   octokit: OctokitClient,
 ) => {
-  if (context.useLabelTrigger) {
-    await removeLabel(
-      octokit,
-      context.repoOwner,
-      context.repoName,
-      context.pullRequest,
-      context.unresolvedLabel,
-    )
-    await loggingService.info('Unresolved label trigger removed from pull request')
-  }
+  await removeLabel(
+    octokit,
+    context.repoOwner,
+    context.repoName,
+    context.pullRequest,
+    context.unresolvedLabel,
+  )
+  await loggingService.info('Unresolved label trigger removed from pull request')
   await setCheckStatusAsSuccess(octokit, context)
   await loggingService.info('Success status check added to pull request')
 }
@@ -87,29 +69,14 @@ export const handleEvent = async (
   octokit: OctokitClient,
 ): Promise<void> => {
   const context = await getContext(loggingService, octokit)
-  if (!context.shouldProcessEvent) {
-    await loggingService.info('Event does not match process requirements', 'Terminating process')
-    return
-  }
-  if (context.commentTriggeredEvent)
-    await deleteSynchronisationCommentTrigger(
-      loggingService,
-      context as CommentCreatedContext,
-      octokit,
-    )
   const { anyUnresolved, numberOfUnresolved } = await checkForUnresolvedThreads(
     loggingService,
-    context as PullRequestContext,
+    context,
     octokit,
   )
   anyUnresolved
-    ? await reportUnresolvedThreads(
-        loggingService,
-        context as PullRequestContext,
-        octokit,
-        numberOfUnresolved,
-      )
-    : await reportNoUnresolvedThreads(loggingService, context as PullRequestContext, octokit)
+    ? await reportUnresolvedThreads(loggingService, context, octokit, numberOfUnresolved)
+    : await reportNoUnresolvedThreads(loggingService, context, octokit)
 }
 
 export const handleError = async (loggingService: LoggingService, error: Error): Promise<void> => {
