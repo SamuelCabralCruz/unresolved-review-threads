@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Temporarily Disable "include administrators" Branch Protection
-        uses: benjefferies/branch-protection-bot@1.0.5
+        uses: benjefferies/branch-protection-bot@master
         if: always()
         with:
           access-token: ${{ secrets.ACCESS_TOKEN }}
@@ -27,7 +27,7 @@ jobs:
           git push
 
       - name: Enable "include administrators" Branch Protection
-        uses: benjefferies/branch-protection-bot@1.0.5
+        uses: benjefferies/branch-protection-bot@master
         if: always()
         with:
           access-token: ${{ secrets.ACCESS_TOKEN }}
