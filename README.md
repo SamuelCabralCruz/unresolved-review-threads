@@ -66,7 +66,10 @@ If you use [probot/settings](https://github.com/probot/settings) to configure yo
 - `unresolvedLabel`: Specify the name of the label to mark a pull request having unresolved review threads.
   - __required__: false
   - __default value__: unresolvedThreads
-  
+- `bypassLabel`: Specify the name of the label to ignore the unresolved threads check on a given pull request.
+  - __required__: false
+  - __default value__: ignoreUnresolved
+
 ## Workflow
 
 - This action flow is currently a lot more complicated than it would otherwise be if GitHub Actions could be triggered on
