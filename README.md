@@ -6,7 +6,7 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
 
 ## Example Usage
 
-- Create a unresolvedReviewThreads.yml file with the following content:
+- Create a `unresolvedReviewThreads.yml` file with the following content:
 
   ```yaml
   name: 'Unresolved Review Threads'
@@ -31,7 +31,6 @@ GitHub Action to prevent the merge of pull request having unresolved review thre
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ```
 
-- If no label input is provided, the action will use a label named `unresolvedThreads` by default.
 - Don't forget to enforce the check in your branch rule settings
 
 ## Probot/Settings
@@ -54,11 +53,9 @@ If you use [probot/settings](https://github.com/probot/settings) to configure yo
           strict: true
           contexts: ['Unresolved Review Threads']
         enforce_admins: true
+        required_signatures: true
         required_linear_history: true
-        restrictions:
-          apps: []
-          users: []
-          teams: []
+        restrictions: null
   ```
 
 ## Inputs
