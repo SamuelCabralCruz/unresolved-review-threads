@@ -9,7 +9,9 @@ import { PartialOctokitClientMock } from '@/test/typing/octokit.helper'
 describe('label', () => {
   const { repoOwner, repoName } = generateRepo()
   const labelName = faker.lorem.word()
-  const pullRequest = generatePullRequest()
+  const pullRequestWithoutSpecificLabel = generatePullRequest({
+    labels: [...generateN(generateLabel).filter((x) => x !== labelName)],
+  })
   const pullRequestWithSpecificLabel = generatePullRequest({
     labels: [...generateN(generateLabel), { name: labelName }],
   })
@@ -23,12 +25,12 @@ describe('label', () => {
     }
 
     test('with pull request not already labeled should add label using octokit', async () => {
-      await act(octokit as any, repoOwner, repoName, pullRequest, labelName)
+      await act(octokit as any, repoOwner, repoName, pullRequestWithoutSpecificLabel, labelName)
 
       expect(octokit.issues.addLabels).toHaveBeenCalledWith({
         owner: repoOwner,
         repo: repoName,
-        issue_number: pullRequest.number,
+        issue_number: pullRequestWithoutSpecificLabel.number,
         labels: [labelName],
       })
     })
@@ -60,7 +62,7 @@ describe('label', () => {
     })
 
     test('with pull request not having specified label should not remove label using octokit', async () => {
-      await act(octokit as any, repoOwner, repoName, pullRequest, labelName)
+      await act(octokit as any, repoOwner, repoName, pullRequestWithoutSpecificLabel, labelName)
 
       expect(octokit.issues.removeLabel).not.toHaveBeenCalled()
     })
