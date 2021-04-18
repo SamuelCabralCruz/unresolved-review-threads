@@ -39,7 +39,7 @@
     "@octokit/types": "6.13.0",
     "@types/faker": "5.5.1",
     "@types/jest": "26.0.22",
-    "@types/node": "14.14.37",
+    "@types/node": "14.14.41",
     "@typescript-eslint/eslint-plugin": "4.21.0",
     "@typescript-eslint/parser": "4.21.0",
     "d2l-license-checker": "3.2.0",
