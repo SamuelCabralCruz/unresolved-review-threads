@@ -31,12 +31,12 @@
   },
   "homepage": "https://github.com/SamuelCabralCruz/unresolved-review-threads#readme",
   "dependencies": {
-    "@actions/core": "1.2.6",
-    "@actions/github": "4.0.0",
-    "@octokit/rest": "18.5.2"
+    "@actions/core": "1.11.1",
+    "@actions/github": "6.0.0",
+    "@octokit/rest": "21.0.2"
   },
   "devDependencies": {
-    "@octokit/types": "6.13.0",
+    "@octokit/types": "13.6.1",
     "@types/faker": "5.5.1",
     "@types/jest": "26.0.22",
     "@types/node": "14.14.37",
